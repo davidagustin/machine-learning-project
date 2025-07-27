@@ -71,20 +71,39 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
 
   const options: ChartOptions<'bar'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          font: {
+            size: 12
+          }
+        }
       },
       title: {
         display: true,
         text: 'Model Performance Metrics Comparison',
+        font: {
+          size: 16
+        }
       },
     },
     scales: {
+      x: {
+        ticks: {
+          font: {
+            size: 12
+          }
+        }
+      },
       y: {
         beginAtZero: true,
         max: 1,
         ticks: {
+          font: {
+            size: 12
+          },
           callback: function(value) {
             return (Number(value) * 100).toFixed(0) + '%';
           }
@@ -94,7 +113,7 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
   };
 
   return (
-    <div style={{ height: '400px', position: 'relative' }}>
+    <div style={{ height: '600px', position: 'relative' }}>
       <Bar data={data} options={options} />
     </div>
   );

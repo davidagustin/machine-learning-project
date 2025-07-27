@@ -183,10 +183,13 @@ export default function ConfusionMatrix({
         max: targetNames.length - 0.5,
         ticks: {
           stepSize: 1,
+          font: {
+            size: 12
+          },
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              return targetNames[index].substring(0, 10) + '...';
+              return targetNames[index].substring(0, 20) + '...';
             }
             return '';
           }
@@ -205,10 +208,13 @@ export default function ConfusionMatrix({
         max: targetNames.length - 0.5,
         ticks: {
           stepSize: 1,
+          font: {
+            size: 12
+          },
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              return targetNames[index].substring(0, 10) + '...';
+              return targetNames[index].substring(0, 20) + '...';
             }
             return '';
           }
@@ -231,12 +237,12 @@ export default function ConfusionMatrix({
     const maxValue = Math.max(...confusionMatrix.flat());
     
     return (
-      <TableContainer component={Paper} sx={{ maxHeight: 600, overflow: 'auto' }}>
+      <TableContainer component={Paper} sx={{ maxHeight: 800, overflow: 'auto' }}>
         <Table size="medium" stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>True\Pred</TableCell>
-              {targetNames.slice(0, 10).map((name, index) => (
+              {targetNames.map((name, index) => (
                 <TableCell 
                   key={index} 
                   sx={{ 
@@ -246,13 +252,13 @@ export default function ConfusionMatrix({
                     padding: '8px'
                   }}
                 >
-                  {name.substring(0, 12)}...
+                  {name.substring(0, 18)}...
                 </TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {confusionMatrix.slice(0, 10).map((row, i) => (
+            {confusionMatrix.map((row, i) => (
               <TableRow key={i}>
                 <TableCell 
                   sx={{ 
@@ -262,9 +268,9 @@ export default function ConfusionMatrix({
                     padding: '8px'
                   }}
                 >
-                  {targetNames[i].substring(0, 12)}...
+                  {targetNames[i].substring(0, 18)}...
                 </TableCell>
-                {row.slice(0, 10).map((cell, j) => {
+                {row.map((cell, j) => {
                   const intensity = cell / maxValue;
                   const isDiagonal = i === j;
                   const backgroundColor = isDiagonal 
@@ -331,7 +337,7 @@ export default function ConfusionMatrix({
             
             <Grid item xs={12} md={6}>
               <Paper elevation={2} sx={{ p: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Table Heatmap (First 10 Classes)</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Table Heatmap (All 20 Classes)</Typography>
                 {createTableHeatmap()}
               </Paper>
             </Grid>

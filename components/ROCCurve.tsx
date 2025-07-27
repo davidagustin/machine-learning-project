@@ -126,13 +126,22 @@ export default function ROCCurve({
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          font: {
+            size: 12
+          }
+        }
       },
       title: {
         display: true,
         text: `ROC Curves - ${selectedModel}`,
+        font: {
+          size: 16
+        }
       },
     },
     scales: {
@@ -143,7 +152,15 @@ export default function ROCCurve({
         max: 1,
         title: {
           display: true,
-          text: 'False Positive Rate'
+          text: 'False Positive Rate',
+          font: {
+            size: 14
+          }
+        },
+        ticks: {
+          font: {
+            size: 12
+          }
         }
       },
       y: {
@@ -152,7 +169,15 @@ export default function ROCCurve({
         max: 1,
         title: {
           display: true,
-          text: 'True Positive Rate'
+          text: 'True Positive Rate',
+          font: {
+            size: 14
+          }
+        },
+        ticks: {
+          font: {
+            size: 12
+          }
         }
       }
     }
@@ -182,7 +207,9 @@ export default function ROCCurve({
           </Typography>
           
           <Paper elevation={2} sx={{ p: 2 }}>
-            <Line data={createROCData()} options={options} />
+            <Box sx={{ height: 600, width: '100%' }}>
+              <Line data={createROCData()} options={options} />
+            </Box>
           </Paper>
 
           <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
