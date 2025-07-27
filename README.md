@@ -360,7 +360,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/davidagustin/machine-learning-project/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/davidagustin/machine-learning-project/discussions)
-- **Email**: [your-email@example.com](mailto:your-email@example.com)
 
 ---
 
@@ -369,6 +368,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ by [David Agustin](https://github.com/davidagustin)**
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/davidagustin)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/davidagustin)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/davidsyagustin)
 
 </div>
