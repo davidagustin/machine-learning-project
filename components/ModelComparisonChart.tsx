@@ -120,13 +120,13 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
   return (
     <div>
       <h2 style={{ 
-        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
-        marginBottom: isMobile ? '1rem' : '1.5rem'
+        fontSize: isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
+        marginBottom: isSmallScreen ? '0.5rem' : isMobile ? '1rem' : '1.5rem'
       }}>
         Model Performance Comparison
       </h2>
       <div style={{ 
-        height: isSmallScreen ? '300px' : isMobile ? '350px' : '400px',
+        height: isSmallScreen ? '250px' : isMobile ? '300px' : '400px',
         width: '100%'
       }}>
         <Bar data={data} options={options} />

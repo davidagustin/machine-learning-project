@@ -213,18 +213,19 @@ export default function ROCCurve({
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ 
-        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
-        mb: isMobile ? 1 : 2
+        fontSize: isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
+        mb: isSmallScreen ? 0.5 : isMobile ? 1 : 2
       }}>
         ROC Curves
       </Typography>
       
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth sx={{ mb: isSmallScreen ? 1 : 2 }}>
         <InputLabel>Select Model</InputLabel>
         <Select
           value={selectedModel}
           label="Select Model"
           onChange={(e) => onModelChange(e.target.value)}
+          size={isSmallScreen ? "small" : "medium"}
         >
           {modelNames.map((name) => (
             <MenuItem key={name} value={name}>
@@ -237,9 +238,9 @@ export default function ROCCurve({
       {rocData ? (
         <Paper elevation={2} sx={{ p: isMobile ? 1 : 2 }}>
           <Box sx={{ 
-            height: isSmallScreen ? 400 : isMobile ? 500 : 600,
+            height: isSmallScreen ? 350 : isMobile ? 450 : 600,
             width: '100%',
-            minHeight: 300
+            minHeight: 250
           }}>
             <Line data={chartData} options={options} />
           </Box>

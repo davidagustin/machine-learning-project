@@ -122,18 +122,21 @@ export default function MetricsTable({ modelResults, targetNames }: MetricsTable
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ 
-        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
-        mb: isMobile ? 1 : 2
+        fontSize: isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
+        mb: isSmallScreen ? 0.5 : isMobile ? 1 : 2
       }}>
         Model Performance Metrics
       </Typography>
       
       <TableContainer component={Paper} sx={{ 
-        maxHeight: isSmallScreen ? 400 : isMobile ? 600 : 800,
+        maxHeight: isSmallScreen ? 300 : isMobile ? 500 : 800,
         overflow: 'auto',
         '& .MuiTableCell-root': {
           padding: cellPadding,
           fontSize: fontSize
+        },
+        '& .MuiTable-root': {
+          minWidth: isSmallScreen ? 600 : 'auto'
         }
       }}>
         <Table size={isSmallScreen ? "small" : "medium"} stickyHeader>

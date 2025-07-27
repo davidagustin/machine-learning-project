@@ -35,3 +35,33 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Mobile-specific improvements */
+@media (max-width: 600px) {
+  /* Improve touch targets */
+  button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better text readability */
+  body {
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  /* Improve scrolling */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Better table handling on mobile */
+  .MuiTableContainer-root {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Improve chart responsiveness */
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}

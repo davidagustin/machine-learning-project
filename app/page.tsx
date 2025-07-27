@@ -126,17 +126,28 @@ export default function Home() {
 
 
   return (
-    <Container maxWidth="xl" sx={{ py: isMobile ? 2 : 4, px: isSmallScreen ? 1 : 2 }}>
-      <Box sx={{ mb: isMobile ? 2 : 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-          <Box>
+    <Container maxWidth="xl" sx={{ 
+      py: isSmallScreen ? 1 : isMobile ? 2 : 4, 
+      px: isSmallScreen ? 0.5 : isMobile ? 1 : 2 
+    }}>
+      <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          mb: isSmallScreen ? 1 : 2,
+          flexDirection: isSmallScreen ? 'column' : 'row',
+          gap: isSmallScreen ? 1 : 0
+        }}>
+          <Box sx={{ textAlign: isSmallScreen ? 'center' : 'left', width: '100%' }}>
             <Typography 
               variant="h3" 
               component="h1" 
               gutterBottom
               sx={{ 
-                fontSize: isSmallScreen ? '1.75rem' : isMobile ? '2.125rem' : '3rem',
-                lineHeight: isSmallScreen ? 1.2 : 1.167
+                fontSize: isSmallScreen ? '1.5rem' : isMobile ? '2rem' : '3rem',
+                lineHeight: isSmallScreen ? 1.2 : 1.167,
+                wordBreak: 'break-word'
               }}
             >
               20 Newsgroups ML Analysis
@@ -146,7 +157,8 @@ export default function Home() {
               color="text.secondary" 
               gutterBottom
               sx={{ 
-                fontSize: isSmallScreen ? '1rem' : isMobile ? '1.125rem' : '1.25rem'
+                fontSize: isSmallScreen ? '0.875rem' : isMobile ? '1rem' : '1.25rem',
+                wordBreak: 'break-word'
               }}
             >
               Text Classification with Multiple Algorithms
@@ -165,6 +177,8 @@ export default function Home() {
                   transform: 'scale(1.1)',
                 },
                 transition: 'all 0.2s ease-in-out',
+                minWidth: isSmallScreen ? '44px' : 'auto',
+                minHeight: isSmallScreen ? '44px' : 'auto',
               }}
             >
               <GitHubIcon sx={{ fontSize: isSmallScreen ? '1.5rem' : '2rem' }} />
@@ -178,7 +192,7 @@ export default function Home() {
       {results && (
         <>
           {/* Dataset Information */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <DatasetInfo
               datasetInfo={results.dataset_info}
               vectorizationInfo={results.vectorization_info}
@@ -187,19 +201,19 @@ export default function Home() {
           </Box>
 
           {/* Hyperparameter Tuning Results */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <HyperparameterTuning
               hyperparameterTuning={results.hyperparameter_tuning}
             />
           </Box>
 
           {/* Model Comparison Chart */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <ModelComparisonChart modelResults={results.model_results} />
           </Box>
 
           {/* Metrics Table */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <MetricsTable
               modelResults={results.model_results}
               targetNames={results.target_names}
@@ -207,7 +221,7 @@ export default function Home() {
           </Box>
 
           {/* Confusion Matrix */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <ConfusionMatrix
               modelResults={results.model_results}
               targetNames={results.target_names}
@@ -217,7 +231,7 @@ export default function Home() {
           </Box>
 
           {/* ROC Curve */}
-          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+          <Box sx={{ mb: isSmallScreen ? 1 : isMobile ? 2 : 4 }}>
             <ROCCurve
               modelResults={results.model_results}
               targetNames={results.target_names}

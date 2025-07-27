@@ -79,7 +79,7 @@ const HyperparameterTuning: React.FC<HyperparameterTuningProps> = ({ hyperparame
           Cross-validation results for optimized model parameters
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 1, sm: 2 }}>
           {/* Summary Cards */}
           {sortedModels.map(([modelName, tuningData]) => (
             <Grid item xs={12} sm={6} md={4} key={modelName}>
@@ -109,6 +109,13 @@ const HyperparameterTuning: React.FC<HyperparameterTuningProps> = ({ hyperparame
                         size="small"
                         variant="outlined"
                         color="primary"
+                        sx={{
+                          fontSize: { xs: '0.625rem', sm: '0.75rem' },
+                          '& .MuiChip-label': {
+                            wordBreak: 'break-word',
+                            textAlign: 'center'
+                          }
+                        }}
                       />
                     ))}
                   </Box>

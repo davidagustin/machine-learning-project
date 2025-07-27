@@ -66,10 +66,16 @@ const DatasetInfo: React.FC<DatasetInfoProps> = ({ datasetInfo, vectorizationInf
   return (
     <Card elevation={3}>
       <CardContent>
-        <Typography variant="h5" component="div" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Typography variant="h5" component="div" gutterBottom sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          flexWrap: 'wrap',
+          fontSize: { xs: '1.125rem', sm: '1.25rem', md: '1.5rem' }
+        }}>
           <DataUsage /> Dataset Information
         </Typography>
-        <Grid container spacing={2}>
+        <Grid container spacing={{ xs: 1, sm: 2 }}>
           {/* Basic Dataset Stats */}
           <Grid item xs={12} md={6}>
             <Paper elevation={1} sx={{ p: 2, height: '100%' }}>
@@ -111,13 +117,21 @@ const DatasetInfo: React.FC<DatasetInfoProps> = ({ datasetInfo, vectorizationInf
               <Typography variant="h6" gutterBottom>
                 Class Distribution
               </Typography>
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {Object.entries(datasetInfo.class_distribution).map(([className, count]) => (
                   <Chip
                     key={className}
                     label={`${className}: ${count}`}
                     size="small"
                     variant="outlined"
+                    sx={{
+                      fontSize: { xs: '0.625rem', sm: '0.75rem' },
+                      maxWidth: { xs: '100%', sm: 'auto' },
+                      '& .MuiChip-label': {
+                        wordBreak: 'break-word',
+                        textAlign: 'center'
+                      }
+                    }}
                   />
                 ))}
               </Box>

@@ -407,12 +407,20 @@ export default function ConfusionMatrix({
 
   return (
     <Box>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <Typography variant="h5" gutterBottom sx={{ 
+        fontSize: isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
+        mb: isSmallScreen ? 0.5 : isMobile ? 1 : 2
+      }}>
+        Confusion Matrix
+      </Typography>
+      
+      <FormControl fullWidth sx={{ mb: isSmallScreen ? 1 : 2 }}>
         <InputLabel>Select Model</InputLabel>
         <Select
           value={selectedModel}
           label="Select Model"
           onChange={(e) => onModelChange(e.target.value)}
+          size={isSmallScreen ? "small" : "medium"}
         >
           {modelNames.map((name) => (
             <MenuItem key={name} value={name}>
