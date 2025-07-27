@@ -1,10 +1,10 @@
 {
   "functions": {
     "pages/api/ml-results.ts": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node@18"
     },
     "pages/api/clear-cache.ts": {
-      "runtime": "nodejs18.x"
+      "runtime": "@vercel/node@18"
     }
   },
   "env": {
