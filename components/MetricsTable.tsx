@@ -11,7 +11,9 @@ import {
   Paper,
   Typography,
   Box,
-  TableSortLabel
+  TableSortLabel,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 
 interface ModelResult {
@@ -37,6 +39,10 @@ export default function MetricsTable({ modelResults, targetNames }: MetricsTable
   // Add null check for modelResults
   const [sortField, setSortField] = useState<SortField>('accuracy');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!modelResults || Object.keys(modelResults).length === 0) {
     return (
@@ -109,138 +115,200 @@ export default function MetricsTable({ modelResults, targetNames }: MetricsTable
 
   const sortedData = sortData(Object.entries(modelResults));
 
+  const cellPadding = isSmallScreen ? '4px' : isMobile ? '6px' : '8px';
+  const fontSize = isSmallScreen ? '0.7rem' : isMobile ? '0.8rem' : '0.875rem';
+  const headerFontSize = isSmallScreen ? '0.75rem' : isMobile ? '0.85rem' : '0.875rem';
+
   return (
     <Box>
-      <Typography variant="h5" component="h2" gutterBottom>
+      <Typography variant="h5" gutterBottom sx={{ 
+        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
+        mb: isMobile ? 1 : 2
+      }}>
         Model Performance Metrics
       </Typography>
-      <TableContainer component={Paper} elevation={2}>
-        <Table>
+      
+      <TableContainer component={Paper} sx={{ 
+        maxHeight: isSmallScreen ? 400 : isMobile ? 600 : 800,
+        overflow: 'auto',
+        '& .MuiTableCell-root': {
+          padding: cellPadding,
+          fontSize: fontSize
+        }
+      }}>
+        <Table size={isSmallScreen ? "small" : "medium"} stickyHeader>
           <TableHead>
-            <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>
+            <TableRow>
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 80 : isMobile ? 100 : 120
+              }}>
                 <TableSortLabel
                   active={sortField === 'model'}
                   direction={sortField === 'model' ? sortDirection : 'asc'}
                   onClick={() => handleSort('model')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   Model
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80
+              }}>
                 <TableSortLabel
                   active={sortField === 'accuracy'}
                   direction={sortField === 'accuracy' ? sortDirection : 'asc'}
                   onClick={() => handleSort('accuracy')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   Accuracy
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80
+              }}>
                 <TableSortLabel
                   active={sortField === 'precision'}
                   direction={sortField === 'precision' ? sortDirection : 'asc'}
                   onClick={() => handleSort('precision')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   Precision
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80
+              }}>
                 <TableSortLabel
                   active={sortField === 'recall'}
                   direction={sortField === 'recall' ? sortDirection : 'asc'}
                   onClick={() => handleSort('recall')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   Recall
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80
+              }}>
                 <TableSortLabel
                   active={sortField === 'f1_score'}
                   direction={sortField === 'f1_score' ? sortDirection : 'asc'}
                   onClick={() => handleSort('f1_score')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   F1-Score
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: headerFontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 80 : isMobile ? 90 : 100
+              }}>
                 <TableSortLabel
                   active={sortField === 'cv_mean'}
                   direction={sortField === 'cv_mean' ? sortDirection : 'asc'}
                   onClick={() => handleSort('cv_mean')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
+                  sx={{ fontSize: headerFontSize }}
                 >
                   CV Score
                 </TableSortLabel>
               </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
-                <TableSortLabel
-                  active={sortField === 'validation_accuracy'}
-                  direction={sortField === 'validation_accuracy' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('validation_accuracy')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
-                >
-                  Validation Acc.
-                </TableSortLabel>
-              </TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }} align="right">
-                <TableSortLabel
-                  active={sortField === 'training_time'}
-                  direction={sortField === 'training_time' ? sortDirection : 'asc'}
-                  onClick={() => handleSort('training_time')}
-                  sx={{ color: 'white', '& .MuiTableSortLabel-icon': { color: 'white' } }}
-                >
-                  Training Time
-                </TableSortLabel>
-              </TableCell>
+              {sortedData.some(([_, result]) => result.validation_accuracy !== undefined) && (
+                <TableCell sx={{ 
+                  fontWeight: 'bold', 
+                  backgroundColor: '#f5f5f5',
+                  fontSize: headerFontSize,
+                  padding: cellPadding,
+                  minWidth: isSmallScreen ? 80 : isMobile ? 90 : 100
+                }}>
+                  <TableSortLabel
+                    active={sortField === 'validation_accuracy'}
+                    direction={sortField === 'validation_accuracy' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('validation_accuracy')}
+                    sx={{ fontSize: headerFontSize }}
+                  >
+                    Val Acc
+                  </TableSortLabel>
+                </TableCell>
+              )}
+              {sortedData.some(([_, result]) => result.training_time !== undefined) && (
+                <TableCell sx={{ 
+                  fontWeight: 'bold', 
+                  backgroundColor: '#f5f5f5',
+                  fontSize: headerFontSize,
+                  padding: cellPadding,
+                  minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80
+                }}>
+                  <TableSortLabel
+                    active={sortField === 'training_time'}
+                    direction={sortField === 'training_time' ? sortDirection : 'asc'}
+                    onClick={() => handleSort('training_time')}
+                    sx={{ fontSize: headerFontSize }}
+                  >
+                    Time (s)
+                  </TableSortLabel>
+                </TableCell>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData.map(([modelName, metrics]) => (
+            {sortedData.map(([modelName, result]) => (
               <TableRow key={modelName} hover>
-                <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
+                <TableCell sx={{ 
+                  fontWeight: 'bold',
+                  fontSize: fontSize,
+                  padding: cellPadding,
+                  minWidth: isSmallScreen ? 80 : isMobile ? 100 : 120
+                }}>
                   {modelName}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatPercentage(metrics.accuracy)}
-                  </Typography>
+                <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80 }}>
+                  {formatPercentage(result.accuracy)}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatPercentage(metrics.precision)}
-                  </Typography>
+                <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80 }}>
+                  {formatPercentage(result.precision)}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatPercentage(metrics.recall)}
-                  </Typography>
+                <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80 }}>
+                  {formatPercentage(result.recall)}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatPercentage(metrics.f1_score)}
-                  </Typography>
+                <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80 }}>
+                  {formatPercentage(result.f1_score)}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {formatWithStd(metrics.cv_mean, metrics.cv_std)}
-                  </Typography>
+                <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 80 : isMobile ? 90 : 100 }}>
+                  {formatWithStd(result.cv_mean, result.cv_std)}
                 </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {metrics.validation_accuracy ? formatPercentage(metrics.validation_accuracy) : 'N/A'}
-                  </Typography>
-                </TableCell>
-                <TableCell align="right">
-                  <Typography variant="body2" color="text.secondary">
-                    {metrics.training_time ? `${metrics.training_time.toFixed(2)}s` : 'N/A'}
-                  </Typography>
-                </TableCell>
+                {sortedData.some(([_, r]) => r.validation_accuracy !== undefined) && (
+                  <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 80 : isMobile ? 90 : 100 }}>
+                    {result.validation_accuracy !== undefined ? formatPercentage(result.validation_accuracy) : '-'}
+                  </TableCell>
+                )}
+                {sortedData.some(([_, r]) => r.training_time !== undefined) && (
+                  <TableCell sx={{ fontSize: fontSize, padding: cellPadding, minWidth: isSmallScreen ? 60 : isMobile ? 70 : 80 }}>
+                    {result.training_time !== undefined ? result.training_time.toFixed(2) : '-'}
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

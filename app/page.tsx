@@ -11,7 +11,9 @@ import {
   Grid,
   Chip,
   IconButton,
-  Tooltip
+  Tooltip,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import { PlayArrow, Refresh, Cached, Clear } from '@mui/icons-material';
 import ModelComparisonChart from '@/components/ModelComparisonChart';
@@ -83,6 +85,10 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [cacheStatus, setCacheStatus] = useState<CacheMetadata | null>(null);
+  
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -141,25 +147,50 @@ export default function Home() {
   };
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom>
+    <Container maxWidth="xl" sx={{ py: isMobile ? 2 : 4, px: isSmallScreen ? 1 : 2 }}>
+      <Box sx={{ mb: isMobile ? 2 : 4 }}>
+        <Typography 
+          variant="h3" 
+          component="h1" 
+          gutterBottom
+          sx={{ 
+            fontSize: isSmallScreen ? '1.75rem' : isMobile ? '2.125rem' : '3rem',
+            lineHeight: isSmallScreen ? 1.2 : 1.167
+          }}
+        >
           20 Newsgroups ML Analysis
         </Typography>
-        <Typography variant="h6" color="text.secondary" gutterBottom>
+        <Typography 
+          variant="h6" 
+          color="text.secondary" 
+          gutterBottom
+          sx={{ 
+            fontSize: isSmallScreen ? '1rem' : isMobile ? '1.125rem' : '1.25rem'
+          }}
+        >
           Text Classification with Multiple Algorithms
         </Typography>
         
         {/* Cache Status and Controls */}
-        <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+        <Box sx={{ 
+          mt: 2, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: isMobile ? 1 : 2, 
+          flexWrap: 'wrap',
+          flexDirection: isSmallScreen ? 'column' : 'row'
+        }}>
           <Button
             variant="contained"
             startIcon={<PlayArrow />}
             onClick={fetchData}
             disabled={loading}
-            sx={{ minWidth: 120 }}
+            sx={{ 
+              minWidth: isSmallScreen ? 100 : 120,
+              fontSize: isSmallScreen ? '0.8rem' : '0.875rem'
+            }}
           >
-            {loading ? <CircularProgress size={20} /> : 'Run Analysis'}
+            {loading ? <CircularProgress size={isSmallScreen ? 16 : 20} /> : 'Run Analysis'}
           </Button>
           
           <Button
@@ -167,6 +198,9 @@ export default function Home() {
             startIcon={<Refresh />}
             onClick={fetchData}
             disabled={loading}
+            sx={{ 
+              fontSize: isSmallScreen ? '0.8rem' : '0.875rem'
+            }}
           >
             Refresh
           </Button>
@@ -181,6 +215,9 @@ export default function Home() {
               }
               color={cacheStatus.cached ? 'success' : 'default'}
               variant="outlined"
+              sx={{ 
+                fontSize: isSmallScreen ? '0.7rem' : '0.75rem'
+              }}
             />
           )}
           
@@ -189,7 +226,7 @@ export default function Home() {
               <IconButton
                 onClick={clearCache}
                 color="warning"
-                size="small"
+                size={isSmallScreen ? "small" : "medium"}
               >
                 <Clear />
               </IconButton>
@@ -199,13 +236,13 @@ export default function Home() {
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 4 }}>
+        <Alert severity="error" sx={{ mb: isMobile ? 2 : 4 }}>
           {error}
         </Alert>
       )}
 
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: isMobile ? 4 : 8 }}>
           <CircularProgress />
         </Box>
       )}
@@ -213,7 +250,7 @@ export default function Home() {
       {results && (
         <>
           {/* Dataset Information */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
             <DatasetInfo
               datasetInfo={results.dataset_info}
               vectorizationInfo={results.vectorization_info}
@@ -222,12 +259,12 @@ export default function Home() {
           </Box>
 
           {/* Model Comparison Chart */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
             <ModelComparisonChart modelResults={results.model_results} />
           </Box>
 
           {/* Metrics Table */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
             <MetricsTable
               modelResults={results.model_results}
               targetNames={results.target_names}
@@ -235,7 +272,7 @@ export default function Home() {
           </Box>
 
           {/* Confusion Matrix */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
             <ConfusionMatrix
               modelResults={results.model_results}
               targetNames={results.target_names}
@@ -245,7 +282,7 @@ export default function Home() {
           </Box>
 
           {/* ROC Curve */}
-          <Box sx={{ mb: 4 }}>
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
             <ROCCurve
               modelResults={results.model_results}
               targetNames={results.target_names}

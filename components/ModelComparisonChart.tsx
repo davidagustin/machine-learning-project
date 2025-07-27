@@ -12,6 +12,7 @@ import {
   ChartOptions
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { useTheme, useMediaQuery } from '@mui/material';
 
 ChartJS.register(
   CategoryScale,
@@ -36,10 +37,19 @@ interface ModelComparisonChartProps {
 }
 
 export default function ModelComparisonChart({ modelResults }: ModelComparisonChartProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  
   // Add null check for modelResults
   if (!modelResults || Object.keys(modelResults).length === 0) {
     return (
-      <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ 
+        height: isSmallScreen ? '300px' : isMobile ? '350px' : '400px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center' 
+      }}>
         <p>Loading model comparison data...</p>
       </div>
     );
@@ -77,7 +87,7 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
         position: 'top' as const,
         labels: {
           font: {
-            size: 12
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       },
@@ -85,7 +95,7 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
         display: true,
         text: 'Model Performance Metrics Comparison',
         font: {
-          size: 16
+          size: isSmallScreen ? 14 : isMobile ? 15 : 16
         }
       },
     },
@@ -93,19 +103,14 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
       x: {
         ticks: {
           font: {
-            size: 12
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       },
       y: {
-        beginAtZero: true,
-        max: 1,
         ticks: {
           font: {
-            size: 12
-          },
-          callback: function(value) {
-            return (Number(value) * 100).toFixed(0) + '%';
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       }
@@ -113,8 +118,19 @@ export default function ModelComparisonChart({ modelResults }: ModelComparisonCh
   };
 
   return (
-    <div style={{ height: '600px', position: 'relative' }}>
-      <Bar data={data} options={options} />
+    <div>
+      <h2 style={{ 
+        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
+        marginBottom: isMobile ? '1rem' : '1.5rem'
+      }}>
+        Model Performance Comparison
+      </h2>
+      <div style={{ 
+        height: isSmallScreen ? '300px' : isMobile ? '350px' : '400px',
+        width: '100%'
+      }}>
+        <Bar data={data} options={options} />
+      </div>
     </div>
   );
 } 

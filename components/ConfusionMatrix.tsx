@@ -15,7 +15,9 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Chart as ChartJS,
@@ -65,6 +67,9 @@ export default function ConfusionMatrix({
   onModelChange 
 }: ConfusionMatrixProps) {
   const [confusionMatrix, setConfusionMatrix] = useState<number[][]>([]);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (selectedModel && modelResults && modelResults[selectedModel] && targetNames) {
@@ -125,7 +130,7 @@ export default function ConfusionMatrix({
           data.push({
             x: j,
             y: i,
-            r: Math.max(5, Math.sqrt(value) * 2), // Size based on value
+            r: Math.max(3, Math.sqrt(value) * 1.5), // Smaller size for better fit
             value: value,
             backgroundColor: backgroundColor
           });
@@ -157,7 +162,7 @@ export default function ConfusionMatrix({
         display: true,
         text: `Confusion Matrix Heatmap - ${selectedModel}`,
         font: {
-          size: 16
+          size: isMobile ? 14 : 16
         }
       },
       tooltip: {
@@ -184,19 +189,23 @@ export default function ConfusionMatrix({
         ticks: {
           stepSize: 1,
           font: {
-            size: 12
+            size: isSmallScreen ? 8 : isMobile ? 10 : 12
           },
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              return targetNames[index].substring(0, 20) + '...';
+              const maxLength = isSmallScreen ? 12 : isMobile ? 15 : 20;
+              return targetNames[index].substring(0, maxLength) + '...';
             }
             return '';
           }
         },
         title: {
           display: true,
-          text: 'Predicted Class'
+          text: 'Predicted Class',
+          font: {
+            size: isMobile ? 12 : 14
+          }
         },
         grid: {
           color: 'rgba(0, 0, 0, 0.1)'
@@ -209,19 +218,23 @@ export default function ConfusionMatrix({
         ticks: {
           stepSize: 1,
           font: {
-            size: 12
+            size: isSmallScreen ? 8 : isMobile ? 10 : 12
           },
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              return targetNames[index].substring(0, 20) + '...';
+              const maxLength = isSmallScreen ? 12 : isMobile ? 15 : 20;
+              return targetNames[index].substring(0, maxLength) + '...';
             }
             return '';
           }
         },
         title: {
           display: true,
-          text: 'True Class'
+          text: 'True Class',
+          font: {
+            size: isMobile ? 12 : 14
+          }
         },
         grid: {
           color: 'rgba(0, 0, 0, 0.1)'
@@ -235,24 +248,46 @@ export default function ConfusionMatrix({
     if (confusionMatrix.length === 0) return null;
 
     const maxValue = Math.max(...confusionMatrix.flat());
+    const cellPadding = isSmallScreen ? '4px' : isMobile ? '6px' : '8px';
+    const fontSize = isSmallScreen ? '0.7rem' : isMobile ? '0.8rem' : '0.9rem';
+    const labelMaxLength = isSmallScreen ? 10 : isMobile ? 12 : 18;
     
     return (
-      <TableContainer component={Paper} sx={{ maxHeight: 800, overflow: 'auto' }}>
-        <Table size="medium" stickyHeader>
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          maxHeight: isSmallScreen ? 400 : isMobile ? 600 : 800, 
+          overflow: 'auto',
+          '& .MuiTableCell-root': {
+            padding: cellPadding,
+            fontSize: fontSize
+          }
+        }}
+      >
+        <Table size={isSmallScreen ? "small" : "medium"} stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>True\Pred</TableCell>
+              <TableCell sx={{ 
+                fontWeight: 'bold', 
+                backgroundColor: '#f5f5f5',
+                fontSize: fontSize,
+                padding: cellPadding,
+                minWidth: isSmallScreen ? 60 : isMobile ? 80 : 100
+              }}>
+                True\Pred
+              </TableCell>
               {targetNames.map((name, index) => (
                 <TableCell 
                   key={index} 
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
-                    fontSize: '0.9rem',
-                    padding: '8px'
+                    fontSize: fontSize,
+                    padding: cellPadding,
+                    minWidth: isSmallScreen ? 40 : isMobile ? 50 : 60
                   }}
                 >
-                  {name.substring(0, 18)}...
+                  {name.substring(0, labelMaxLength)}...
                 </TableCell>
               ))}
             </TableRow>
@@ -264,11 +299,12 @@ export default function ConfusionMatrix({
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
-                    fontSize: '0.9rem',
-                    padding: '8px'
+                    fontSize: fontSize,
+                    padding: cellPadding,
+                    minWidth: isSmallScreen ? 60 : isMobile ? 80 : 100
                   }}
                 >
-                  {targetNames[i].substring(0, 18)}...
+                  {targetNames[i].substring(0, labelMaxLength)}...
                 </TableCell>
                 {row.map((cell, j) => {
                   const intensity = cell / maxValue;
@@ -284,10 +320,11 @@ export default function ConfusionMatrix({
                         backgroundColor,
                         color: intensity > 0.5 ? 'white' : 'black',
                         fontWeight: isDiagonal ? 'bold' : 'normal',
-                        fontSize: '0.9rem',
-                        padding: '8px',
+                        fontSize: fontSize,
+                        padding: cellPadding,
                         textAlign: 'center',
-                        border: isDiagonal ? '2px solid #2e7d32' : '1px solid #ddd'
+                        border: isDiagonal ? '2px solid #2e7d32' : '1px solid #ddd',
+                        minWidth: isSmallScreen ? 40 : isMobile ? 50 : 60
                       }}
                     >
                       {cell}
@@ -325,34 +362,63 @@ export default function ConfusionMatrix({
             Heatmap showing confusion matrix. Green cells on diagonal = correct predictions, red cells off-diagonal = incorrect predictions.
           </Typography>
           
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Paper elevation={2} sx={{ p: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Scatter Heatmap</Typography>
-                <Box sx={{ height: 600, width: '100%' }}>
+          <Grid container spacing={isMobile ? 2 : 3}>
+            <Grid item xs={12}>
+              <Paper elevation={2} sx={{ p: isMobile ? 1 : 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontSize: isMobile ? '1.1rem' : '1.25rem' }}>
+                  Scatter Heatmap
+                </Typography>
+                <Box sx={{ 
+                  height: isSmallScreen ? 400 : isMobile ? 500 : 600, 
+                  width: '100%',
+                  minHeight: 300
+                }}>
                   <Scatter data={createHeatmapData()} options={options} />
                 </Box>
               </Paper>
             </Grid>
             
-            <Grid item xs={12} md={6}>
-              <Paper elevation={2} sx={{ p: 2 }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Table Heatmap (All 20 Classes)</Typography>
+            <Grid item xs={12}>
+              <Paper elevation={2} sx={{ p: isMobile ? 1 : 2 }}>
+                <Typography variant="h6" sx={{ mb: 2, fontSize: isMobile ? '1.1rem' : '1.25rem' }}>
+                  Table Heatmap (All 20 Classes)
+                </Typography>
                 {createTableHeatmap()}
               </Paper>
             </Grid>
           </Grid>
 
-          <Box sx={{ mt: 2, display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Box sx={{ 
+            mt: 2, 
+            display: 'flex', 
+            gap: isMobile ? 1 : 2, 
+            alignItems: 'center', 
+            flexWrap: 'wrap',
+            flexDirection: isSmallScreen ? 'column' : 'row'
+          }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 20, height: 20, backgroundColor: 'rgba(76, 175, 80, 0.8)', borderRadius: '50%' }} />
-              <Typography variant="body2">Correct Predictions (Diagonal)</Typography>
+              <Box sx={{ 
+                width: isSmallScreen ? 16 : 20, 
+                height: isSmallScreen ? 16 : 20, 
+                backgroundColor: 'rgba(76, 175, 80, 0.8)', 
+                borderRadius: '50%' 
+              }} />
+              <Typography variant="body2" sx={{ fontSize: isSmallScreen ? '0.8rem' : '0.875rem' }}>
+                Correct Predictions (Diagonal)
+              </Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Box sx={{ width: 20, height: 20, backgroundColor: 'rgba(244, 67, 54, 0.8)', borderRadius: '50%' }} />
-              <Typography variant="body2">Incorrect Predictions (Off-diagonal)</Typography>
+              <Box sx={{ 
+                width: isSmallScreen ? 16 : 20, 
+                height: isSmallScreen ? 16 : 20, 
+                backgroundColor: 'rgba(244, 67, 54, 0.8)', 
+                borderRadius: '50%' 
+              }} />
+              <Typography variant="body2" sx={{ fontSize: isSmallScreen ? '0.8rem' : '0.875rem' }}>
+                Incorrect Predictions (Off-diagonal)
+              </Typography>
             </Box>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: isSmallScreen ? '0.8rem' : '0.875rem' }}>
               Darker colors = higher counts
             </Typography>
           </Box>

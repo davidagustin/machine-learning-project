@@ -8,7 +8,9 @@ import {
   Select,
   MenuItem,
   Typography,
-  Paper
+  Paper,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Chart as ChartJS,
@@ -63,6 +65,9 @@ export default function ROCCurve({
   onModelChange 
 }: ROCCurveProps) {
   const [rocData, setRocData] = useState<any>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
     if (selectedModel && modelResults && modelResults[selectedModel] && modelResults[selectedModel].roc_data) {
@@ -132,7 +137,7 @@ export default function ROCCurve({
         position: 'top' as const,
         labels: {
           font: {
-            size: 12
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       },
@@ -140,7 +145,7 @@ export default function ROCCurve({
         display: true,
         text: `ROC Curves - ${selectedModel}`,
         font: {
-          size: 16
+          size: isSmallScreen ? 14 : isMobile ? 15 : 16
         }
       },
     },
@@ -154,12 +159,12 @@ export default function ROCCurve({
           display: true,
           text: 'False Positive Rate',
           font: {
-            size: 14
+            size: isSmallScreen ? 12 : isMobile ? 13 : 14
           }
         },
         ticks: {
           font: {
-            size: 12
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       },
@@ -171,12 +176,12 @@ export default function ROCCurve({
           display: true,
           text: 'True Positive Rate',
           font: {
-            size: 14
+            size: isSmallScreen ? 12 : isMobile ? 13 : 14
           }
         },
         ticks: {
           font: {
-            size: 12
+            size: isSmallScreen ? 10 : isMobile ? 11 : 12
           }
         }
       }
@@ -185,6 +190,13 @@ export default function ROCCurve({
 
   return (
     <Box>
+      <Typography variant="h5" gutterBottom sx={{ 
+        fontSize: isSmallScreen ? '1.25rem' : isMobile ? '1.5rem' : '1.75rem',
+        mb: isMobile ? 1 : 2
+      }}>
+        ROC Curves
+      </Typography>
+      
       <FormControl fullWidth sx={{ mb: 2 }}>
         <InputLabel>Select Model</InputLabel>
         <Select
@@ -201,28 +213,19 @@ export default function ROCCurve({
       </FormControl>
 
       {rocData ? (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            ROC curves show the trade-off between true positive rate and false positive rate
-          </Typography>
-          
-          <Paper elevation={2} sx={{ p: 2 }}>
-            <Box sx={{ height: 600, width: '100%' }}>
-              <Line data={createROCData()} options={options} />
-            </Box>
-          </Paper>
-
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-            Curves closer to the top-left corner indicate better performance. AUC &gt; 0.9 is excellent.
-          </Typography>
-        </Box>
+        <Paper elevation={2} sx={{ p: isMobile ? 1 : 2 }}>
+          <Box sx={{ 
+            height: isSmallScreen ? 400 : isMobile ? 500 : 600,
+            width: '100%',
+            minHeight: 300
+          }}>
+            <Line data={createROCData()} options={options} />
+          </Box>
+        </Paper>
       ) : (
-        <Box sx={{ textAlign: 'center', py: 4 }}>
-          <Typography variant="body2" color="text.secondary">
-            {selectedModel === 'SVM' 
-              ? 'SVM does not provide probability estimates, so ROC curves are not available.'
-              : 'ROC curve data not available for this model.'
-            }
+        <Box sx={{ p: 2, textAlign: 'center' }}>
+          <Typography color="text.secondary">
+            No ROC curve data available for the selected model.
           </Typography>
         </Box>
       )}
