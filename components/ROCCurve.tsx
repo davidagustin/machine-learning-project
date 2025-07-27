@@ -70,6 +70,7 @@ export default function ROCCurve({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isExtraSmall = useMediaQuery(theme.breakpoints.down('xs'));
 
   const chartData = useMemo(() => {
     if (!rocData) {
@@ -99,8 +100,13 @@ export default function ROCCurve({
         return null;
       }
       
+      // Shorten class names for mobile display
+      const displayName = isExtraSmall ? 
+        className.split('.').pop() || className : 
+        className;
+      
       return {
-        label: `${className} (AUC: ${auc.toFixed(3)})`,
+        label: `${displayName} (AUC: ${auc.toFixed(3)})`,
         data: fprArray.map((fpr: number, j: number) => ({
           x: fpr,
           y: tprArray[j] || 0
@@ -125,7 +131,7 @@ export default function ROCCurve({
       labels: [],
       datasets
     };
-  }, [rocData, targetNames]);
+  }, [rocData, targetNames, isExtraSmall]);
 
   useEffect(() => {
     if (selectedModel && modelResults && modelResults[selectedModel] && modelResults[selectedModel].roc_data) {
@@ -156,18 +162,23 @@ export default function ROCCurve({
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: isExtraSmall ? 'bottom' : 'top' as const,
+        align: 'start' as const,
         labels: {
           font: {
-            size: isSmallScreen ? 10 : isMobile ? 11 : 12
-          }
+            size: isExtraSmall ? 8 : isSmallScreen ? 9 : isMobile ? 10 : 12
+          },
+          boxWidth: isExtraSmall ? 12 : isSmallScreen ? 14 : 16,
+          boxHeight: isExtraSmall ? 8 : isSmallScreen ? 10 : 12,
+          padding: isExtraSmall ? 8 : isSmallScreen ? 10 : 15,
+          usePointStyle: true
         }
       },
       title: {
         display: true,
         text: `ROC Curves - ${selectedModel}`,
         font: {
-          size: isSmallScreen ? 14 : isMobile ? 15 : 16
+          size: isExtraSmall ? 12 : isSmallScreen ? 14 : isMobile ? 15 : 16
         }
       },
     },
@@ -181,12 +192,12 @@ export default function ROCCurve({
           display: true,
           text: 'False Positive Rate',
           font: {
-            size: isSmallScreen ? 12 : isMobile ? 13 : 14
+            size: isExtraSmall ? 10 : isSmallScreen ? 11 : isMobile ? 12 : 14
           }
         },
         ticks: {
           font: {
-            size: isSmallScreen ? 10 : isMobile ? 11 : 12
+            size: isExtraSmall ? 8 : isSmallScreen ? 9 : isMobile ? 10 : 12
           }
         }
       },
@@ -198,12 +209,12 @@ export default function ROCCurve({
           display: true,
           text: 'True Positive Rate',
           font: {
-            size: isSmallScreen ? 12 : isMobile ? 13 : 14
+            size: isExtraSmall ? 10 : isSmallScreen ? 11 : isMobile ? 12 : 14
           }
         },
         ticks: {
           font: {
-            size: isSmallScreen ? 10 : isMobile ? 11 : 12
+            size: isExtraSmall ? 8 : isSmallScreen ? 9 : isMobile ? 10 : 12
           }
         }
       }
@@ -213,19 +224,19 @@ export default function ROCCurve({
   return (
     <Box>
       <Typography variant="h5" gutterBottom sx={{ 
-        fontSize: isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
-        mb: isSmallScreen ? 0.5 : isMobile ? 1 : 2
+        fontSize: isExtraSmall ? '1rem' : isSmallScreen ? '1.125rem' : isMobile ? '1.25rem' : '1.75rem',
+        mb: isExtraSmall ? 0.5 : isSmallScreen ? 0.5 : isMobile ? 1 : 2
       }}>
         ROC Curves
       </Typography>
       
-      <FormControl fullWidth sx={{ mb: isSmallScreen ? 1 : 2 }}>
+      <FormControl fullWidth sx={{ mb: isExtraSmall ? 0.5 : isSmallScreen ? 1 : 2 }}>
         <InputLabel>Select Model</InputLabel>
         <Select
           value={selectedModel}
           label="Select Model"
           onChange={(e) => onModelChange(e.target.value)}
-          size={isSmallScreen ? "small" : "medium"}
+          size={isExtraSmall ? "small" : isSmallScreen ? "small" : "medium"}
         >
           {modelNames.map((name) => (
             <MenuItem key={name} value={name}>
@@ -236,11 +247,11 @@ export default function ROCCurve({
       </FormControl>
 
       {rocData ? (
-        <Paper elevation={2} sx={{ p: isMobile ? 1 : 2 }}>
+        <Paper elevation={2} sx={{ p: isExtraSmall ? 0.5 : isMobile ? 1 : 2 }}>
           <Box sx={{ 
-            height: isSmallScreen ? 350 : isMobile ? 450 : 600,
+            height: isExtraSmall ? 280 : isSmallScreen ? 320 : isMobile ? 400 : 600,
             width: '100%',
-            minHeight: 250
+            minHeight: isExtraSmall ? 200 : 250
           }}>
             <Line data={chartData} options={options} />
           </Box>

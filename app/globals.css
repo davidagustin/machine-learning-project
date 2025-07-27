@@ -64,4 +64,38 @@ a {
     max-width: 100% !important;
     height: auto !important;
   }
+  
+  /* Better chart container handling */
+  .chartjs-render-monitor {
+    max-width: 100% !important;
+  }
+  
+  /* Improve legend readability on mobile */
+  .chartjs-legend {
+    font-size: 10px !important;
+  }
+  
+  /* Better spacing for mobile charts */
+  .MuiPaper-root {
+    margin: 4px !important;
+  }
+}
+
+/* Extra small screen improvements */
+@media (max-width: 480px) {
+  /* Even smaller text for very small screens */
+  .chartjs-legend {
+    font-size: 8px !important;
+  }
+  
+  /* Reduce padding on very small screens */
+  .MuiContainer-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  /* Better chart height for very small screens */
+  .MuiBox-root canvas {
+    max-height: 250px !important;
+  }
 }
