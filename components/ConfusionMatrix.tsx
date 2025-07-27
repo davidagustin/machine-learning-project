@@ -51,6 +51,7 @@ interface ModelResult {
   cv_std: number;
   predictions: number[];
   true_labels: number[];
+  confusion_matrix?: number[][];
 }
 
 interface ConfusionMatrixProps {
@@ -72,10 +73,16 @@ export default function ConfusionMatrix({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   useEffect(() => {
-    if (selectedModel && modelResults && modelResults[selectedModel] && targetNames) {
+    if (selectedModel && modelResults && modelResults[selectedModel]) {
       const result = modelResults[selectedModel];
-      const matrix = computeConfusionMatrix(result.true_labels, result.predictions, targetNames.length);
-      setConfusionMatrix(matrix);
+      if (result.confusion_matrix) {
+        // Use pre-computed confusion matrix
+        setConfusionMatrix(result.confusion_matrix);
+      } else if (result.true_labels && result.predictions && targetNames) {
+        // Fallback to computing from predictions
+        const matrix = computeConfusionMatrix(result.true_labels, result.predictions, targetNames.length);
+        setConfusionMatrix(matrix);
+      }
     }
   }, [selectedModel, modelResults, targetNames]);
 

@@ -6,8 +6,11 @@ import {
   Typography,
   Box,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  IconButton,
+  Tooltip
 } from '@mui/material';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 import ModelComparisonChart from '@/components/ModelComparisonChart';
 import DatasetInfo from '@/components/DatasetInfo';
@@ -26,6 +29,21 @@ interface ModelResult {
   validation_accuracy?: number;
   predictions: number[];
   true_labels: number[];
+  confusion_matrix?: number[][];
+  roc_data?: {
+    [key: string]: {
+      fpr: number[];
+      tpr: number[];
+      auc: number;
+    };
+  };
+  feature_importance?: Array<{
+    feature: string;
+    importance: number;
+  }>;
+  training_time?: number;
+  prediction_time?: number;
+  model_size_mb?: number;
 }
 
 interface DatasetInfo {
@@ -103,36 +121,56 @@ export default function Home() {
     };
 
     fetchData();
-  }, [selectedModel]);
+  }, [selectedModel]); // Include selectedModel in dependencies
 
 
 
   return (
     <Container maxWidth="xl" sx={{ py: isMobile ? 2 : 4, px: isSmallScreen ? 1 : 2 }}>
       <Box sx={{ mb: isMobile ? 2 : 4 }}>
-        <Typography 
-          variant="h3" 
-          component="h1" 
-          gutterBottom
-          sx={{ 
-            fontSize: isSmallScreen ? '1.75rem' : isMobile ? '2.125rem' : '3rem',
-            lineHeight: isSmallScreen ? 1.2 : 1.167
-          }}
-        >
-          20 Newsgroups ML Analysis
-        </Typography>
-        <Typography 
-          variant="h6" 
-          color="text.secondary" 
-          gutterBottom
-          sx={{ 
-            fontSize: isSmallScreen ? '1rem' : isMobile ? '1.125rem' : '1.25rem'
-          }}
-        >
-          Text Classification with Multiple Algorithms
-        </Typography>
-        
-
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box>
+            <Typography 
+              variant="h3" 
+              component="h1" 
+              gutterBottom
+              sx={{ 
+                fontSize: isSmallScreen ? '1.75rem' : isMobile ? '2.125rem' : '3rem',
+                lineHeight: isSmallScreen ? 1.2 : 1.167
+              }}
+            >
+              20 Newsgroups ML Analysis
+            </Typography>
+            <Typography 
+              variant="h6" 
+              color="text.secondary" 
+              gutterBottom
+              sx={{ 
+                fontSize: isSmallScreen ? '1rem' : isMobile ? '1.125rem' : '1.25rem'
+              }}
+            >
+              Text Classification with Multiple Algorithms
+            </Typography>
+          </Box>
+          
+          <Tooltip title="View on GitHub">
+            <IconButton
+              href="https://github.com/davidagustin/machine-learning-project"
+              target="_blank"
+              rel="noopener noreferrer"
+              sx={{
+                color: 'text.secondary',
+                '&:hover': {
+                  color: 'primary.main',
+                  transform: 'scale(1.1)',
+                },
+                transition: 'all 0.2s ease-in-out',
+              }}
+            >
+              <GitHubIcon sx={{ fontSize: isSmallScreen ? '1.5rem' : '2rem' }} />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
 

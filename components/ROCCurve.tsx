@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Box,
   FormControl,
@@ -45,9 +45,11 @@ interface ModelResult {
   predictions: number[];
   true_labels: number[];
   roc_data?: {
-    fpr: { [key: string]: number[] };
-    tpr: { [key: string]: number[] };
-    auc: { [key: string]: number };
+    [key: string]: {
+      fpr: number[];
+      tpr: number[];
+      auc: number;
+    };
   };
 }
 
@@ -68,6 +70,62 @@ export default function ROCCurve({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const chartData = useMemo(() => {
+    if (!rocData) {
+      return { labels: [], datasets: [] };
+    }
+    
+    // The data structure is: rocData = { "0": {fpr: [...], tpr: [...], auc: ...}, "1": {...}, ... }
+    const classKeys = Object.keys(rocData);
+    
+    if (classKeys.length === 0) {
+      return { labels: [], datasets: [] };
+    }
+
+    const datasets = classKeys.map((classIndex, i) => {
+      const classData = rocData[classIndex];
+      if (!classData || !classData.fpr || !classData.tpr || !classData.auc) {
+        return null;
+      }
+      
+      const classNum = parseInt(classIndex);
+      const className = targetNames && targetNames[classNum] ? targetNames[classNum] : `Class ${classNum}`;
+      const auc = classData.auc;
+      const fprArray = classData.fpr;
+      const tprArray = classData.tpr;
+      
+      if (!fprArray || !tprArray || fprArray.length === 0 || tprArray.length === 0) {
+        return null;
+      }
+      
+      return {
+        label: `${className} (AUC: ${auc.toFixed(3)})`,
+        data: fprArray.map((fpr: number, j: number) => ({
+          x: fpr,
+          y: tprArray[j] || 0
+        })),
+        borderColor: `hsl(${(i * 360) / classKeys.length}, 70%, 50%)`,
+        backgroundColor: `hsla(${(i * 360) / classKeys.length}, 70%, 50%, 0.1)`,
+        tension: 0.1,
+        pointRadius: 0
+      };
+    }).filter((dataset): dataset is NonNullable<typeof dataset> => dataset !== null); // Remove null entries
+
+    // Add diagonal line for reference
+    datasets.push({
+      label: 'Random Classifier (AUC: 0.500)',
+      data: [{ x: 0, y: 0 }, { x: 1, y: 1 }],
+      borderColor: 'rgba(0, 0, 0, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+      pointRadius: 0
+    } as any);
+
+    return {
+      labels: [],
+      datasets
+    };
+  }, [rocData, targetNames]);
 
   useEffect(() => {
     if (selectedModel && modelResults && modelResults[selectedModel] && modelResults[selectedModel].roc_data) {
@@ -92,49 +150,6 @@ export default function ROCCurve({
   const modelNames = Object.keys(modelResults).filter(name => 
     modelResults[name].roc_data !== undefined
   );
-
-  const createROCData = () => {
-    if (!rocData || !rocData.fpr || !rocData.tpr || !rocData.auc) {
-      return { labels: [], datasets: [] };
-    }
-
-    const fprKeys = Object.keys(rocData.fpr);
-    if (fprKeys.length === 0) {
-      return { labels: [], datasets: [] };
-    }
-
-    const datasets = fprKeys.map((classIndex, i) => {
-      const classNum = parseInt(classIndex);
-      const className = targetNames && targetNames[classNum] ? targetNames[classNum] : `Class ${classNum}`;
-      const auc = rocData.auc[classIndex] || 0;
-      
-      return {
-        label: `${className} (AUC: ${auc.toFixed(3)})`,
-        data: rocData.fpr[classIndex].map((fpr: number, j: number) => ({
-          x: fpr,
-          y: rocData.tpr[classIndex][j] || 0
-        })),
-        borderColor: `hsl(${(i * 360) / fprKeys.length}, 70%, 50%)`,
-        backgroundColor: `hsla(${(i * 360) / fprKeys.length}, 70%, 50%, 0.1)`,
-        tension: 0.1,
-        pointRadius: 0
-      };
-    });
-
-    // Add diagonal line for reference
-    datasets.push({
-      label: 'Random Classifier (AUC: 0.500)',
-      data: [{ x: 0, y: 0 }, { x: 1, y: 1 }],
-      borderColor: 'rgba(0, 0, 0, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.1)',
-      pointRadius: 0
-    } as any);
-
-    return {
-      labels: [],
-      datasets
-    };
-  };
 
   const options: ChartOptions<'line'> = {
     responsive: true,
@@ -226,7 +241,7 @@ export default function ROCCurve({
             width: '100%',
             minHeight: 300
           }}>
-            <Line data={createROCData()} options={options} />
+            <Line data={chartData} options={options} />
           </Box>
         </Paper>
       ) : (
