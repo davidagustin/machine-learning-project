@@ -11,7 +11,7 @@ A comprehensive machine learning analysis dashboard for the 20 Newsgroups datase
 
 ## 📊 Live Demo
 
-🌐 **Access the Dashboard**: [https://machine-learning-project-b0a59lpbt-cryptomans-projects.vercel.app](https://machine-learning-project-b0a59lpbt-cryptomans-projects.vercel.app)
+🌐 **Access the Dashboard**: [https://machine-learning-project-theta.vercel.app](https://machine-learning-project-theta.vercel.app)
 
 ## 🎯 Project Overview
 
