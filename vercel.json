@@ -1,12 +1,4 @@
 {
-  "functions": {
-    "pages/api/ml-results.ts": {
-      "runtime": "@vercel/node@18"
-    },
-    "pages/api/clear-cache.ts": {
-      "runtime": "@vercel/node@18"
-    }
-  },
   "env": {
     "REDIS_URL": "redis://default:af4tenGgBW1FIbhHF0O78NI3xYHs6fFv@redis-10393.c14.us-east-1-3.ec2.redns.redis-cloud.com:10393"
   },
