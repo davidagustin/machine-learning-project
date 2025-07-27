@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -84,7 +84,7 @@ export default function Home() {
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [cacheStatus, setCacheStatus] = useState<CacheMetadata | null>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -111,9 +111,9 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedModel]);
 
-  const clearCache = async () => {
+  const clearCache = useCallback(async () => {
     try {
       const response = await fetch('/api/clear-cache', { method: 'POST' });
       const data = await response.json();
@@ -127,11 +127,11 @@ export default function Home() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to clear cache');
     }
-  };
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   const formatTTL = (seconds?: number) => {
     if (!seconds || seconds <= 0) return 'Expired';

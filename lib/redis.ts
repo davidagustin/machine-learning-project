@@ -72,10 +72,11 @@ export const isCacheAvailable = async (): Promise<boolean> => {
   }
 };
 
-export const getCacheInfo = async (): Promise<{ available: boolean }> => {
+export const getCacheInfo = async (): Promise<{ available: boolean; ttl?: number }> => {
   try {
     await redis.ping();
-    return { available: true };
+    const ttl = await redis.ttl(ML_RESULTS_CACHE_KEY);
+    return { available: true, ttl: ttl > 0 ? ttl : undefined };
   } catch (error) {
     return { available: false };
   }

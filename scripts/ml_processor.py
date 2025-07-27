@@ -116,7 +116,7 @@ def cache_results(results, target_names):
         }
         
         # Cache the data
-        r.setex('ml_results', 3600, json.dumps(cache_data))  # Cache for 1 hour
+        r.setex('ml_analysis_results', 3600, json.dumps(cache_data))  # Cache for 1 hour
         print(f"  Cached results for {len(results)} models", file=sys.stderr)
         
     except Exception as e:

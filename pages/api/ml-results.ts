@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           cache_metadata: {
             cached: true,
             cache_available: true,
+            ttl_seconds: cacheInfo.ttl,
             source: 'redis_cache'
           }
         });
@@ -111,6 +112,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       cache_metadata: {
         cached: false,
         cache_available: cacheInfo.available,
+        ttl_seconds: cacheInfo.ttl,
         source: 'fresh_analysis'
       }
     });
