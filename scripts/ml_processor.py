@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_20newsgroups
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
@@ -92,37 +92,32 @@ def preprocess_data(newsgroups):
     return (X_train_vectorized, X_val_vectorized, X_test_vectorized, 
             y_train, y_val, y_test, vectorizer, feature_names, target_names)
 
-def cache_results(results, target_names):
-    """Cache the current results to Redis after each model completes"""
+def cache_results(results, target_names, dataset_info=None, data_split_info=None, hyperparameter_tuning=None):
+    """Save results to a static file (Redis caching removed)"""
     try:
-        import redis
-        import os
-        
-        # Get Redis URL from environment variable
-        redis_url = os.getenv('REDIS_URL')
-        if not redis_url:
-            print("  No REDIS_URL found, skipping caching", file=sys.stderr)
-            return
-        
-        # Connect to Redis
-        r = redis.from_url(redis_url)
-        
-        # Prepare data for caching
+        # Prepare data for saving
         cache_data = {
             'model_results': results,
             'target_names': list(target_names),
             'timestamp': time.time(),
-            'models_completed': len(results)
+            'dataset_info': dataset_info,
+            'data_split_info': data_split_info,
+            'hyperparameter_tuning': hyperparameter_tuning
         }
         
-        # Cache the data
-        r.setex('ml_analysis_results', 3600, json.dumps(cache_data))  # Cache for 1 hour
-        print(f"  Cached results for {len(results)} models", file=sys.stderr)
+        # Save to a static file instead of Redis
+        output_path = os.path.join(os.path.dirname(__file__), '..', 'data', 'ml_results.json')
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
+        with open(output_path, 'w') as f:
+            json.dump(cache_data, f, indent=2)
+        
+        print("  Results saved to static file", file=sys.stderr)
         
     except Exception as e:
-        print(f"  Error caching results: {str(e)}", file=sys.stderr)
+        print(f"  Error saving results: {str(e)}", file=sys.stderr)
 
-def train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names):
+def train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names, dataset_info=None, data_split_info=None, hyperparameter_tuning=None):
     """Train multiple classification models with comprehensive evaluation"""
     print("Training models...", file=sys.stderr)
     
@@ -196,9 +191,9 @@ def train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names):
             reg_alpha=0.1,
             reg_lambda=1.0,
             objective='multiclass',
-            num_class=n_classes,
+            num_class=len(target_names),
             n_jobs=-1,  # Use all CPU cores
-            min_child_samples=20  # Increased from 10
+            verbose=-1  # Suppress output
         )
     
     if CATBOOST_AVAILABLE:
@@ -207,51 +202,62 @@ def train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names):
             depth=2,  # Further reduced from 3
             learning_rate=0.3,  # Increased from 0.2
             random_state=42,
+            subsample=0.8,
             colsample_bylevel=0.8,
             reg_lambda=1.0,
-            verbose=False,
+            loss_function='MultiClass',
+            classes_count=len(target_names),
             thread_count=-1,  # Use all CPU cores
-            grow_policy='Lossguide',  # Faster growing policy
-            min_data_in_leaf=20,  # Increased from 10
-            bootstrap_type='Bernoulli',  # Explicit bootstrap type
-            subsample=0.8  # Now compatible with Bernoulli bootstrap
+            verbose=False  # Suppress output
         )
     
     results = {}
     
     for name, model in models.items():
-        print(f"Training {name}...", file=sys.stderr)
-        
         try:
-            # Start timing
+            print(f"  Training {name}...", file=sys.stderr)
+            
+            # Record training start time
             start_time = time.time()
             
+            # Train the model
             model.fit(X_train, y_train)
+            
+            # Record training time
+            training_time = time.time() - start_time
+            
+            # Make predictions
+            y_train_pred = model.predict(X_train)
             y_val_pred = model.predict(X_val)
-            val_accuracy = accuracy_score(y_val, y_val_pred)
             y_test_pred = model.predict(X_test)
+            
+            # Calculate metrics
+            train_accuracy = accuracy_score(y_train, y_train_pred)
+            val_accuracy = accuracy_score(y_val, y_val_pred)
             test_accuracy = accuracy_score(y_test, y_test_pred)
+            
+            # Cross-validation
+            cv_scores = cross_val_score(model, X_train, y_train, cv=3, scoring='accuracy')
+            cv_mean = cv_scores.mean()
+            cv_std = cv_scores.std()
+            
+            # Calculate precision, recall, and F1-score
             precision = precision_score(y_test, y_test_pred, average='weighted')
             recall = recall_score(y_test, y_test_pred, average='weighted')
             f1 = f1_score(y_test, y_test_pred, average='weighted')
-            cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
             
+            # Generate ROC curves if possible
             roc_data = generate_roc_curves(model, X_test, y_test_bin, n_classes)
             
-            # End timing
-            end_time = time.time()
-            training_time = end_time - start_time
-            
-            print(f"  {name} - Validation Accuracy: {val_accuracy:.4f}, Test Accuracy: {test_accuracy:.4f}, Time: {training_time:.2f}s", file=sys.stderr)
-            
+            # Store results
             results[name] = {
                 'accuracy': float(test_accuracy),
-                'validation_accuracy': float(val_accuracy),
                 'precision': float(precision),
                 'recall': float(recall),
                 'f1_score': float(f1),
-                'cv_mean': float(cv_scores.mean()),
-                'cv_std': float(cv_scores.std()),
+                'cv_mean': float(cv_mean),
+                'cv_std': float(cv_std),
+                'validation_accuracy': float(val_accuracy),  # Add validation accuracy
                 'training_time': float(training_time),  # Add training time
                 'predictions': y_test_pred.tolist() if hasattr(y_test_pred, 'tolist') else list(y_test_pred),
                 'true_labels': y_test.tolist() if hasattr(y_test, 'tolist') else list(y_test),
@@ -259,7 +265,7 @@ def train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names):
             }
             
             # Cache the results after each model completes
-            cache_results(results, target_names)
+            cache_results(results, target_names, dataset_info, data_split_info, hyperparameter_tuning)
             
         except Exception as e:
             print(f"  Error training {name}: {str(e)}", file=sys.stderr)
@@ -300,6 +306,165 @@ def generate_roc_curves(model, X_test, y_test_bin, n_classes):
     except Exception as e:
         print(f"  Error generating ROC curves: {str(e)}", file=sys.stderr)
         return None
+
+def hyperparameter_tuning(X_train, X_val, y_train, y_val, target_names):
+    """Perform hyperparameter tuning on the best performing models"""
+    print("Performing hyperparameter tuning...", file=sys.stderr)
+    
+    # Combine training and validation data for cross-validation
+    X_combined = np.vstack([X_train.toarray(), X_val.toarray()])
+    y_combined = np.concatenate([y_train, y_val])
+    
+    tuning_results = {}
+    
+    # 1. Logistic Regression Tuning (reduced grid)
+    print("  Tuning Logistic Regression...", file=sys.stderr)
+    lr_param_grid = {
+        'C': [0.1, 1.0, 5.0],
+        'penalty': ['l2'],
+        'solver': ['liblinear'],
+        'max_iter': [1000]
+    }
+    
+    lr_grid = GridSearchCV(
+        LogisticRegression(random_state=42, multi_class='ovr'),
+        lr_param_grid,
+        cv=3,
+        scoring='accuracy',
+        n_jobs=2,  # Reduced from -1 to 2
+        verbose=0
+    )
+    
+    lr_grid.fit(X_combined, y_combined)
+    tuning_results['Logistic Regression'] = {
+        'best_params': lr_grid.best_params_,
+        'best_score': float(lr_grid.best_score_),
+        'cv_results': {
+            'mean_test_score': lr_grid.cv_results_['mean_test_score'].tolist(),
+            'std_test_score': lr_grid.cv_results_['std_test_score'].tolist(),
+            'params': lr_grid.cv_results_['params']
+        }
+    }
+    
+    # 2. Random Forest Tuning (reduced grid)
+    print("  Tuning Random Forest...", file=sys.stderr)
+    rf_param_grid = {
+        'n_estimators': [25, 50],
+        'max_depth': [5, 8, None],
+        'min_samples_split': [2, 5],
+        'min_samples_leaf': [1, 2],
+        'max_features': ['sqrt']
+    }
+    
+    rf_grid = GridSearchCV(
+        RandomForestClassifier(random_state=42, n_jobs=2),  # Reduced from -1 to 2
+        rf_param_grid,
+        cv=3,
+        scoring='accuracy',
+        n_jobs=2,  # Reduced from -1 to 2
+        verbose=0
+    )
+    
+    rf_grid.fit(X_combined, y_combined)
+    tuning_results['Random Forest'] = {
+        'best_params': rf_grid.best_params_,
+        'best_score': float(rf_grid.best_score_),
+        'cv_results': {
+            'mean_test_score': rf_grid.cv_results_['mean_test_score'].tolist(),
+            'std_test_score': rf_grid.cv_results_['std_test_score'].tolist(),
+            'params': rf_grid.cv_results_['params']
+        }
+    }
+    
+    # 3. Support Vector Machine Tuning (reduced grid)
+    print("  Tuning Support Vector Machine...", file=sys.stderr)
+    svm_param_grid = {
+        'C': [0.5, 1.0, 2.0],
+        'loss': ['squared_hinge'],
+        'max_iter': [1000]
+    }
+    
+    svm_grid = GridSearchCV(
+        LinearSVC(random_state=42, dual=False, tol=1e-4),
+        svm_param_grid,
+        cv=3,
+        scoring='accuracy',
+        n_jobs=2,  # Reduced from -1 to 2
+        verbose=0
+    )
+    
+    svm_grid.fit(X_combined, y_combined)
+    tuning_results['Support Vector Machine'] = {
+        'best_params': svm_grid.best_params_,
+        'best_score': float(svm_grid.best_score_),
+        'cv_results': {
+            'mean_test_score': svm_grid.cv_results_['mean_test_score'].tolist(),
+            'std_test_score': svm_grid.cv_results_['std_test_score'].tolist(),
+            'params': svm_grid.cv_results_['params']
+        }
+    }
+    
+    # 4. Gradient Boosting Tuning (if available) - reduced grid
+    if XGBOOST_AVAILABLE:
+        print("  Tuning XGBoost...", file=sys.stderr)
+        xgb_param_grid = {
+            'n_estimators': [25, 50],
+            'max_depth': [2, 3],
+            'learning_rate': [0.1, 0.2],
+            'subsample': [0.8, 1.0],
+            'colsample_bytree': [0.8, 1.0]
+        }
+        
+        xgb_grid = GridSearchCV(
+            xgb.XGBClassifier(random_state=42, eval_metric='mlogloss', use_label_encoder=False, n_jobs=2),  # Reduced from -1 to 2
+            xgb_param_grid,
+            cv=3,
+            scoring='accuracy',
+            n_jobs=2,  # Reduced from -1 to 2
+            verbose=0
+        )
+        
+        xgb_grid.fit(X_combined, y_combined)
+        tuning_results['XGBoost'] = {
+            'best_params': xgb_grid.best_params_,
+            'best_score': float(xgb_grid.best_score_),
+            'cv_results': {
+                'mean_test_score': xgb_grid.cv_results_['mean_test_score'].tolist(),
+                'std_test_score': xgb_grid.cv_results_['std_test_score'].tolist(),
+                'params': xgb_grid.cv_results_['params']
+            }
+        }
+    
+    # 5. K-Nearest Neighbors Tuning (reduced grid)
+    print("  Tuning K-Nearest Neighbors...", file=sys.stderr)
+    knn_param_grid = {
+        'n_neighbors': [3, 5, 7],
+        'weights': ['uniform', 'distance'],
+        'metric': ['minkowski']
+    }
+    
+    knn_grid = GridSearchCV(
+        KNeighborsClassifier(),
+        knn_param_grid,
+        cv=3,
+        scoring='accuracy',
+        n_jobs=2,  # Reduced from -1 to 2
+        verbose=0
+    )
+    
+    knn_grid.fit(X_combined, y_combined)
+    tuning_results['K-Nearest Neighbors'] = {
+        'best_params': knn_grid.best_params_,
+        'best_score': float(knn_grid.best_score_),
+        'cv_results': {
+            'mean_test_score': knn_grid.cv_results_['mean_test_score'].tolist(),
+            'std_test_score': knn_grid.cv_results_['std_test_score'].tolist(),
+            'params': knn_grid.cv_results_['params']
+        }
+    }
+    
+    print("Hyperparameter tuning completed!", file=sys.stderr)
+    return tuning_results
 
 def get_dataset_info(newsgroups, vectorizer, feature_names):
     """Get detailed information about the dataset and vectorization"""
@@ -356,14 +521,26 @@ def main():
         # Get detailed dataset info including vectorization
         dataset_info = get_dataset_info(newsgroups, vectorizer, feature_names)
         
+        # Perform hyperparameter tuning
+        tuning_results = hyperparameter_tuning(X_train, X_val, y_train, y_val, target_names)
+        
         # Train models with validation
-        results = train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names)
+        results = train_models(X_train, X_val, X_test, y_train, y_val, y_test, target_names, dataset_info, {
+            'total_samples': len(newsgroups.data),
+            'train_samples': len(y_train),
+            'val_samples': len(y_val),
+            'test_samples': len(y_test),
+            'train_percentage': round(len(y_train) / len(newsgroups.data) * 100, 1),
+            'val_percentage': round(len(y_val) / len(newsgroups.data) * 100, 1),
+            'test_percentage': round(len(y_test) / len(newsgroups.data) * 100, 1)
+        }, tuning_results)
         
         # Prepare output
         output = {
             'dataset_info': dataset_info,
             'model_results': results,
             'target_names': list(target_names),
+            'hyperparameter_tuning': tuning_results,
             'data_split_info': {
                 'total_samples': len(newsgroups.data),
                 'train_samples': len(y_train),

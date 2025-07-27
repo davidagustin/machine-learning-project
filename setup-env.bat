@@ -18,28 +18,21 @@ if exist ".env.local" (
 echo 📝 Creating .env.local file...
 echo.
 
-REM Create .env.local with Vercel Redis configuration
+REM Create .env.local file
 (
-echo # Redis Configuration for Vercel Redis
-echo REDIS_URL=redis://default:af4tenGgBW1FIbhHF0O78NI3xYHs6fFv@redis-10393.c14.us-east-1-3.ec2.redns.redis-cloud.com:10393
-echo.
-echo # Optional: Local Redis fallback configuration
-echo # REDIS_HOST=localhost
-echo # REDIS_PORT=6379
-echo # REDIS_PASSWORD=
+echo # Environment configuration
+echo # Add any environment variables here as needed
 ) > .env.local
 
 echo ✅ .env.local file created successfully!
 echo.
 echo 🔒 Security Notes:
 echo    - .env.local is automatically ignored by git
-echo    - Never commit your actual Redis credentials
-echo    - The Redis URL is configured for Vercel Redis
+echo    - Add any environment variables you need here
 echo.
 echo 📋 Next Steps:
-echo    1. The Redis URL is already configured for Vercel Redis
-echo    2. For local development: You can change to redis://localhost:6379
-echo    3. The ML processor will automatically cache results after each model completes
+echo    1. The ML processor will save results to static files
+echo    2. Results will be served from the data directory
 echo.
 echo 🚀 You can now run: npm run dev
 echo.

@@ -189,13 +189,32 @@ export default function ConfusionMatrix({
         ticks: {
           stepSize: 1,
           font: {
-            size: isSmallScreen ? 8 : isMobile ? 10 : 12
+            size: isSmallScreen ? 10 : isMobile ? 12 : 14
           },
+          maxRotation: 45,
+          minRotation: 45,
+          padding: 8,
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              const maxLength = isSmallScreen ? 12 : isMobile ? 15 : 20;
-              return targetNames[index].substring(0, maxLength) + '...';
+              const maxLength = isSmallScreen ? 15 : isMobile ? 18 : 25;
+              const label = targetNames[index];
+              if (label.length > maxLength) {
+                // Try to keep the most important part (usually the last part)
+                const parts = label.split('.');
+                if (parts.length > 1) {
+                  // Keep the last part and truncate if needed
+                  const lastPart = parts[parts.length - 1];
+                  if (lastPart.length <= maxLength) {
+                    return lastPart;
+                  } else {
+                    return lastPart.substring(0, maxLength - 3) + '...';
+                  }
+                } else {
+                  return label.substring(0, maxLength - 3) + '...';
+                }
+              }
+              return label;
             }
             return '';
           }
@@ -204,7 +223,10 @@ export default function ConfusionMatrix({
           display: true,
           text: 'Predicted Class',
           font: {
-            size: isMobile ? 12 : 14
+            size: isMobile ? 14 : 16
+          },
+          padding: {
+            top: 10
           }
         },
         grid: {
@@ -218,13 +240,30 @@ export default function ConfusionMatrix({
         ticks: {
           stepSize: 1,
           font: {
-            size: isSmallScreen ? 8 : isMobile ? 10 : 12
+            size: isSmallScreen ? 10 : isMobile ? 12 : 14
           },
+          padding: 8,
           callback: function(value: any) {
             const index = Math.round(value);
             if (index >= 0 && index < targetNames.length) {
-              const maxLength = isSmallScreen ? 12 : isMobile ? 15 : 20;
-              return targetNames[index].substring(0, maxLength) + '...';
+              const maxLength = isSmallScreen ? 15 : isMobile ? 18 : 25;
+              const label = targetNames[index];
+              if (label.length > maxLength) {
+                // Try to keep the most important part (usually the last part)
+                const parts = label.split('.');
+                if (parts.length > 1) {
+                  // Keep the last part and truncate if needed
+                  const lastPart = parts[parts.length - 1];
+                  if (lastPart.length <= maxLength) {
+                    return lastPart;
+                  } else {
+                    return lastPart.substring(0, maxLength - 3) + '...';
+                  }
+                } else {
+                  return label.substring(0, maxLength - 3) + '...';
+                }
+              }
+              return label;
             }
             return '';
           }
@@ -233,7 +272,10 @@ export default function ConfusionMatrix({
           display: true,
           text: 'True Class',
           font: {
-            size: isMobile ? 12 : 14
+            size: isMobile ? 14 : 16
+          },
+          padding: {
+            bottom: 10
           }
         },
         grid: {
@@ -250,7 +292,24 @@ export default function ConfusionMatrix({
     const maxValue = Math.max(...confusionMatrix.flat());
     const cellPadding = isSmallScreen ? '4px' : isMobile ? '6px' : '8px';
     const fontSize = isSmallScreen ? '0.7rem' : isMobile ? '0.8rem' : '0.9rem';
-    const labelMaxLength = isSmallScreen ? 10 : isMobile ? 12 : 18;
+    const labelMaxLength = isSmallScreen ? 12 : isMobile ? 15 : 20;
+    
+    // Helper function for smart label truncation
+    const truncateLabel = (label: string, maxLength: number) => {
+      if (label.length <= maxLength) return label;
+      
+      const parts = label.split('.');
+      if (parts.length > 1) {
+        const lastPart = parts[parts.length - 1];
+        if (lastPart.length <= maxLength) {
+          return lastPart;
+        } else {
+          return lastPart.substring(0, maxLength - 3) + '...';
+        }
+      } else {
+        return label.substring(0, maxLength - 3) + '...';
+      }
+    };
     
     return (
       <TableContainer 
@@ -287,7 +346,7 @@ export default function ConfusionMatrix({
                     minWidth: isSmallScreen ? 40 : isMobile ? 50 : 60
                   }}
                 >
-                  {name.substring(0, labelMaxLength)}...
+                  {truncateLabel(name, labelMaxLength)}
                 </TableCell>
               ))}
             </TableRow>
@@ -304,7 +363,7 @@ export default function ConfusionMatrix({
                     minWidth: isSmallScreen ? 60 : isMobile ? 80 : 100
                   }}
                 >
-                  {targetNames[i].substring(0, labelMaxLength)}...
+                  {truncateLabel(targetNames[i], labelMaxLength)}
                 </TableCell>
                 {row.map((cell, j) => {
                   const intensity = cell / maxValue;
@@ -369,9 +428,9 @@ export default function ConfusionMatrix({
                   Scatter Heatmap
                 </Typography>
                 <Box sx={{ 
-                  height: isSmallScreen ? 400 : isMobile ? 500 : 600, 
+                  height: isSmallScreen ? 500 : isMobile ? 600 : 700, 
                   width: '100%',
-                  minHeight: 300
+                  minHeight: 400
                 }}>
                   <Scatter data={createHeatmapData()} options={options} />
                 </Box>

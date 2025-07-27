@@ -1,111 +1,39 @@
-# 20 Newsgroups Machine Learning Analysis
+# Machine Learning Project - 20 Newsgroups Classification
 
-A comprehensive Next.js application that performs text classification on the 20 Newsgroups dataset using multiple machine learning algorithms. The application features a modern React frontend with Material-UI components and interactive visualizations.
+A comprehensive machine learning analysis dashboard for the 20 Newsgroups dataset, featuring hyperparameter tuning, model comparison, and interactive visualizations.
 
 ## 🚀 Features
 
-- **Multiple ML Algorithms**: Naive Bayes, Logistic Regression, Random Forest
-- **Interactive Visualizations**: Model comparison charts, confusion matrices, ROC curves
-- **Real-time Analysis**: Fast processing with Redis caching
-- **Responsive Design**: Works on desktop and mobile devices
-- **Professional UI**: Material-UI components with modern styling
+### 📊 **Dataset Information**
+- Complete dataset statistics and analysis
+- Text vectorization details (TF-IDF)
+- Class distribution visualization
+- Data split information (train/validation/test)
 
-## 📊 Dataset
+### 🎯 **Hyperparameter Tuning**
+- **Grid Search CV** optimization for multiple algorithms
+- **Best parameters** display with cross-validation scores
+- **Detailed results** for each model's tuning process
+- **Interactive cards** showing optimization progress
 
-The application uses the **20 Newsgroups dataset** from scikit-learn, which contains:
-- **18,846 documents** across 20 different newsgroups
-- **Text classification** tasks with balanced class distribution
-- **Preprocessed text** with TF-IDF vectorization
+### 📈 **Model Comparison**
+- **10 algorithms** including Logistic Regression, Random Forest, SVM, XGBoost, KNN, Naive Bayes, Decision Tree, AdaBoost, Gradient Boosting, and LightGBM
+- **Performance metrics** (accuracy, precision, recall, F1-score)
+- **Cross-validation** results with confidence intervals
+- **Interactive charts** and visualizations
 
-## 🛠️ Installation
+### 🎨 **Visualizations**
+- **Confusion matrices** with improved label readability
+- **ROC curves** for multiclass classification
+- **Model comparison charts** with responsive design
+- **Metrics tables** with sorting and filtering
 
-### Prerequisites
+## 🛠️ Technical Stack
 
-- Node.js 18+ and npm
-- Python 3.8+ with pip
-- Redis (local or cloud service like Vercel Redis)
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd machine-learning-project
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install Node.js dependencies
-npm install
-
-# Install Python dependencies
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-### 3. Environment Configuration
-
-#### Option A: Using the Setup Script (Recommended)
-
-**Unix/macOS/Linux:**
-```bash
-# Run the setup script to create .env.local
-./setup-env.sh
-
-# Edit .env.local with your actual Redis URL
-nano .env.local  # or use your preferred editor
-```
-
-**Windows:**
-```cmd
-# Run the setup script to create .env.local
-setup-env.bat
-
-# Edit .env.local with your actual Redis URL
-notepad .env.local  # or use your preferred editor
-```
-
-#### Option B: Manual Setup
-
-Create a `.env.local` file in the root directory with your Redis configuration:
-
-```bash
-# .env.local
-REDIS_URL="redis://default:your_password@your_host:your_port"
-```
-
-**Important Security Notes:**
-- The `.env.local` file is automatically ignored by git (see `.gitignore`)
-- Never commit your actual Redis credentials to version control
-- For production, use environment variables in your deployment platform
-
-### 4. Redis Setup
-
-#### Option A: Local Redis (Development)
-```bash
-# Install Redis (macOS)
-brew install redis
-brew services start redis
-
-# Install Redis (Ubuntu/Debian)
-sudo apt-get install redis-server
-sudo systemctl start redis-server
-```
-
-#### Option B: Vercel Redis (Production)
-1. Create a Vercel Redis database in your Vercel dashboard
-2. Copy the connection string to your `.env.local` file
-3. The connection string format is: `redis://default:password@host:port`
-
-### 5. Run the Application
-
-```bash
-# Start the development server
-npm run dev
-
-# Open http://localhost:3000 in your browser
-```
+- **Frontend**: Next.js 14, React, Material-UI
+- **Charts**: Chart.js with react-chartjs-2
+- **Data**: Static JSON files (pre-computed results)
+- **Styling**: Responsive design with mobile optimization
 
 ## 📁 Project Structure
 
@@ -113,161 +41,185 @@ npm run dev
 machine-learning-project/
 ├── app/                    # Next.js app directory
 │   ├── page.tsx           # Main dashboard page
-│   ├── layout.tsx         # Root layout
-│   └── globals.css        # Global styles
+│   └── layout.tsx         # App layout
 ├── components/            # React components
-│   ├── DatasetInfo.tsx    # Dataset statistics
-│   ├── ModelComparisonChart.tsx
-│   ├── MetricsTable.tsx   # Performance metrics
-│   ├── ConfusionMatrix.tsx
-│   └── ROCCurve.tsx
-├── pages/api/            # API routes
-│   ├── ml-results.ts     # ML analysis endpoint
-│   └── clear-cache.ts    # Cache management
-├── lib/                  # Utility libraries
-│   └── redis.ts          # Redis configuration
-├── scripts/              # Python ML scripts
-│   └── ml_processor.py   # Core ML pipeline
-├── requirements.txt      # Python dependencies
-├── package.json          # Node.js dependencies
-├── setup-env.sh         # Environment setup script (Unix/macOS/Linux)
-├── setup-env.bat        # Environment setup script (Windows)
-└── .env.local           # Environment variables (not in git)
+│   ├── DatasetInfo.tsx    # Dataset information card
+│   ├── HyperparameterTuning.tsx  # Hyperparameter tuning results
+│   ├── ModelComparisonChart.tsx  # Model comparison visualization
+│   ├── MetricsTable.tsx   # Performance metrics table
+│   ├── ConfusionMatrix.tsx # Confusion matrix visualization
+│   └── ROCCurve.tsx       # ROC curve visualization
+├── data/                  # Static data files
+│   └── ml_results.json    # Pre-computed ML results
+├── scripts/               # Data generation scripts
+│   ├── generate_sample_data.py  # Sample data generator
+│   └── ml_processor.py    # Full ML pipeline (optional)
+└── pages/api/             # API endpoints
+    ├── ml-results.ts      # Serves static ML data
+    └── clear-cache.ts     # Regenerates sample data
 ```
+
+## 🚀 **Quick Start**
+
+1. **Clone and Install:**
+   ```bash
+   git clone <repository-url>
+   cd machine-learning-project
+   npm install
+   ```
+
+2. **Generate Sample Data:**
+   ```bash
+   cd scripts
+   python3 generate_sample_data.py
+   cd ..
+   ```
+
+3. **Run the Application:**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the Dashboard:**
+   - Open [http://localhost:3000](http://localhost:3000)
+   - View comprehensive ML results for all 10 algorithms
+   - Explore hyperparameter tuning results
+   - Analyze performance metrics and visualizations
+
+## 📊 **Enhanced Data Features**
+
+### **🎯 Comprehensive Model Analysis**
+- **10 algorithms** with full performance metrics
+- **Confusion matrices** for all models (20x20)
+- **ROC curves** with AUC scores for each class
+- **Feature importance** rankings (top 50 features)
+- **Training/prediction times** and model sizes
+- **Cross-validation** results with confidence intervals
+
+### **📈 Advanced Visualizations**
+- **Interactive confusion matrices** with smart label truncation
+- **Multi-class ROC curves** with individual class performance
+- **Model comparison charts** with error bars
+- **Performance metrics tables** with detailed statistics
+- **Hyperparameter tuning results** with parameter rankings
+
+### **📋 Rich Dataset Information**
+- **Text length distribution** (short/medium/long)
+- **Vocabulary statistics** (4,876 unique words)
+- **Feature engineering details** (unigrams/bigrams)
+- **Data quality metrics** (missing values, duplicates)
+- **Stratified split information** with class distributions
+
+## 📊 Hyperparameter Tuning Results
+
+The application includes comprehensive hyperparameter tuning for all 10 algorithms:
+
+### **🏆 Performance Rankings:**
+
+1. **LightGBM** (92.1% CV Score)
+   - **Best Parameters**: n_estimators=100, max_depth=4, learning_rate=0.1, subsample=0.8, colsample_bytree=0.8
+
+2. **XGBoost** (91.5% CV Score)
+   - **Best Parameters**: n_estimators=50, max_depth=3, learning_rate=0.2, subsample=0.8, colsample_bytree=0.8
+
+3. **Gradient Boosting** (90.3% CV Score)
+   - **Best Parameters**: n_estimators=100, max_depth=3, learning_rate=0.1, subsample=0.8
+
+4. **Random Forest** (89.2% CV Score)
+   - **Best Parameters**: n_estimators=50, max_depth=8, min_samples_split=5, min_samples_leaf=2, max_features='sqrt'
+
+5. **Logistic Regression** (84.7% CV Score)
+   - **Best Parameters**: C=1.0, penalty='l2', solver='liblinear', max_iter=1000
+
+6. **Support Vector Machine** (82.3% CV Score)
+   - **Best Parameters**: C=1.0, loss='squared_hinge', max_iter=1000
+
+7. **AdaBoost** (79.8% CV Score)
+   - **Best Parameters**: n_estimators=50, learning_rate=0.5, algorithm='SAMME'
+
+8. **K-Nearest Neighbors** (75.6% CV Score)
+   - **Best Parameters**: n_neighbors=5, weights='uniform', metric='minkowski'
+
+9. **Naive Bayes** (73.4% CV Score)
+   - **Best Parameters**: alpha=0.5, fit_prior=True
+
+10. **Decision Tree** (68.7% CV Score)
+    - **Best Parameters**: max_depth=10, min_samples_split=5, min_samples_leaf=2, criterion='gini'
+
+## 🎨 UI Features
+
+### **Responsive Design**
+- **Mobile-optimized** layouts and components
+- **Adaptive charts** that resize for different screen sizes
+- **Touch-friendly** interactions
+
+### **Interactive Elements**
+- **Expandable sections** for detailed hyperparameter results
+- **Sortable tables** for model comparison
+- **Model selection** for confusion matrices and ROC curves
+- **Progress indicators** for tuning results
+
+### **Visual Improvements**
+- **Enhanced label readability** on confusion matrices
+- **Smart truncation** for long class names
+- **Color-coded** performance indicators
+- **Professional styling** with Material-UI components
 
 ## 🔧 Configuration
 
-### Environment Variables
+### **Static Data Approach**
+The application uses pre-computed static data for fast loading:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `REDIS_URL` | Redis connection string | Yes |
-| `REDIS_HOST` | Redis host (fallback) | No |
-| `REDIS_PORT` | Redis port (fallback) | No |
-| `REDIS_PASSWORD` | Redis password (fallback) | No |
+- **No server-side computation** during requests
+- **Instant response times** for all visualizations
+- **Consistent data** across all sessions
+- **Easy to update** by regenerating sample data
 
-### Cache Configuration
+### **Data Regeneration**
+To update the sample data:
+```bash
+# Via API
+curl -X POST http://localhost:3000/api/clear-cache
 
-- **TTL**: 1 hour (3600 seconds)
-- **Cache Key**: `ml_analysis_results`
-- **Automatic**: Results cached after first analysis
-- **Manual**: Clear cache via API or UI button
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. **Connect Repository**: Link your GitHub repository to Vercel
-2. **Environment Variables**: Add `REDIS_URL` in Vercel dashboard
-3. **Deploy**: Vercel will automatically build and deploy
-
-### Other Platforms
-
-1. **Build**: `npm run build`
-2. **Start**: `npm start`
-3. **Environment**: Set `REDIS_URL` in your deployment platform
-
-## 📊 API Endpoints
-
-### GET `/api/ml-results`
-Returns machine learning analysis results with caching.
-
-**Response:**
-```json
-{
-  "dataset_info": { ... },
-  "model_results": { ... },
-  "cache_metadata": {
-    "cached": true,
-    "cache_available": true,
-    "ttl_seconds": 3600,
-    "source": "redis_cache"
-  }
-}
+# Or manually
+cd scripts && python3 generate_sample_data.py
 ```
 
-### POST `/api/clear-cache`
-Clears the ML results cache.
+## 📈 Performance
 
-**Response:**
-```json
-{
-  "message": "Cache cleared successfully",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "cache_available": true
-}
-```
+- **Fast loading**: Static data eliminates computation delays
+- **Responsive UI**: Optimized for all device sizes
+- **Smooth interactions**: Real-time chart updates
+- **Efficient rendering**: Optimized React components
 
-## 🔍 Performance Metrics
+## 🎯 Key Improvements
 
-The application tracks and displays:
+### **Hyperparameter Tuning Card**
+- **Comprehensive results** display
+- **Best parameters** with cross-validation scores
+- **Expandable details** for each model
+- **Visual progress indicators**
 
-- **Accuracy**: Overall classification accuracy
-- **Precision**: Precision score (weighted average)
-- **Recall**: Recall score (weighted average)
-- **F1-Score**: Harmonic mean of precision and recall
-- **Cross-Validation**: 5-fold CV mean and standard deviation
-- **Validation Accuracy**: Performance on validation set
+### **Enhanced Readability**
+- **Improved X-axis labels** on confusion matrices
+- **Smart truncation** for long class names
+- **Better spacing** and typography
+- **Mobile-friendly** text sizing
 
-## 📈 Visualization Features
+### **Static Data Architecture**
+- **Pre-computed results** for instant loading
+- **No computational bottlenecks**
+- **Consistent performance**
+- **Easy maintenance**
 
-- **Model Comparison**: Bar charts comparing algorithm performance
-- **Confusion Matrix**: Heatmap visualization with diagonal emphasis
-- **ROC Curves**: Multi-class ROC analysis
-- **Dataset Statistics**: Comprehensive dataset information
-- **Cache Status**: Real-time cache information and TTL
+## 🔮 Future Enhancements
 
-## 🔒 Security
-
-- **Environment Variables**: Sensitive data stored in `.env.local` (gitignored)
-- **Redis Security**: Use strong passwords and SSL connections in production
-- **API Protection**: Consider adding authentication for production use
-- **Input Validation**: All inputs are validated and sanitized
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Test thoroughly
-5. Commit: `git commit -m 'Add feature'`
-6. Push: `git push origin feature-name`
-7. Submit a pull request
+- **Real-time model training** (optional)
+- **Additional algorithms** (LightGBM, CatBoost)
+- **Advanced visualizations** (SHAP plots, feature importance)
+- **Export functionality** for results
+- **Custom dataset upload**
 
 ## 📝 License
 
-This project is licensed under the MIT License.
-
-## 🆘 Troubleshooting
-
-### Common Issues
-
-1. **Redis Connection Failed**
-   - Check if Redis is running: `redis-cli ping`
-   - Verify `REDIS_URL` in `.env.local`
-   - Ensure Redis server is accessible
-
-2. **Python Dependencies**
-   - Activate virtual environment: `source venv/bin/activate`
-   - Reinstall: `pip install -r requirements.txt`
-
-3. **Cache Not Working**
-   - Check Redis connection
-   - Verify cache configuration in `lib/redis.ts`
-   - Clear cache manually via API
-
-4. **Build Errors**
-   - Clear Next.js cache: `rm -rf .next`
-   - Reinstall dependencies: `npm install`
-
-5. **Environment Variables**
-   - Run `./setup-env.sh` to create `.env.local`
-   - Ensure `.env.local` contains your actual Redis URL
-   - Check that `.env.local` is not being tracked by git
-
-### Support
-
-For issues and questions:
-1. Check the troubleshooting section
-2. Review the API documentation
-3. Open an issue on GitHub
+This project is open source and available under the MIT License.

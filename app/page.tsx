@@ -1,26 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
-  Button,
   Box,
-  CircularProgress,
-  Alert,
-  Grid,
-  Chip,
-  IconButton,
-  Tooltip,
   useTheme,
   useMediaQuery
 } from '@mui/material';
-import { PlayArrow, Refresh, Cached, Clear } from '@mui/icons-material';
+
 import ModelComparisonChart from '@/components/ModelComparisonChart';
 import DatasetInfo from '@/components/DatasetInfo';
 import MetricsTable from '@/components/MetricsTable';
 import ConfusionMatrix from '@/components/ConfusionMatrix';
 import ROCCurve from '@/components/ROCCurve';
+import HyperparameterTuning from '@/components/HyperparameterTuning';
 
 interface ModelResult {
   accuracy: number;
@@ -63,12 +57,7 @@ interface DataSplitInfo {
   test_percentage: number;
 }
 
-interface CacheMetadata {
-  cached: boolean;
-  cache_available: boolean;
-  ttl_seconds?: number;
-  source: 'redis_cache' | 'fresh_analysis';
-}
+
 
 interface MLResults {
   dataset_info: DatasetInfo;
@@ -76,75 +65,47 @@ interface MLResults {
   target_names: string[];
   vectorization_info?: any;
   data_split_info?: DataSplitInfo;
-  cache_metadata?: CacheMetadata;
+
+  hyperparameter_tuning?: any;
 }
 
 export default function Home() {
   const [results, setResults] = useState<MLResults | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('');
-  const [cacheStatus, setCacheStatus] = useState<CacheMetadata | null>(null);
-  
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const response = await fetch('/api/ml-results');
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || data.error || 'Failed to fetch data');
-      }
-      
-      setResults(data);
-      setCacheStatus(data.cache_metadata || null);
-      
-      // Set the first model as selected if none is selected
-      if (!selectedModel && data.model_results) {
-        const firstModel = Object.keys(data.model_results)[0];
-        if (firstModel) {
-          setSelectedModel(firstModel);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/ml-results');
+        const data = await response.json();
+        
+        if (!response.ok) {
+          console.error('Failed to fetch data:', data);
+          return;
         }
+        
+        setResults(data);
+        
+        // Set the first model as selected if none is selected
+        if (!selectedModel && data.model_results) {
+          const firstModel = Object.keys(data.model_results)[0];
+          if (firstModel) {
+            setSelectedModel(firstModel);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    fetchData();
   }, [selectedModel]);
 
-  const clearCache = useCallback(async () => {
-    try {
-      const response = await fetch('/api/clear-cache', { method: 'POST' });
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to clear cache');
-      }
-      
-      // Refresh the data after clearing cache
-      await fetchData();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to clear cache');
-    }
-  }, [fetchData]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const formatTTL = (seconds?: number) => {
-    if (!seconds || seconds <= 0) return 'Expired';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}m ${remainingSeconds}s`;
-  };
 
   return (
     <Container maxWidth="xl" sx={{ py: isMobile ? 2 : 4, px: isSmallScreen ? 1 : 2 }}>
@@ -171,81 +132,10 @@ export default function Home() {
           Text Classification with Multiple Algorithms
         </Typography>
         
-        {/* Cache Status and Controls */}
-        <Box sx={{ 
-          mt: 2, 
-          display: 'flex', 
-          alignItems: 'center', 
-          gap: isMobile ? 1 : 2, 
-          flexWrap: 'wrap',
-          flexDirection: isSmallScreen ? 'column' : 'row'
-        }}>
-          <Button
-            variant="contained"
-            startIcon={<PlayArrow />}
-            onClick={fetchData}
-            disabled={loading}
-            sx={{ 
-              minWidth: isSmallScreen ? 100 : 120,
-              fontSize: isSmallScreen ? '0.8rem' : '0.875rem'
-            }}
-          >
-            {loading ? <CircularProgress size={isSmallScreen ? 16 : 20} /> : 'Run Analysis'}
-          </Button>
-          
-          <Button
-            variant="outlined"
-            startIcon={<Refresh />}
-            onClick={fetchData}
-            disabled={loading}
-            sx={{ 
-              fontSize: isSmallScreen ? '0.8rem' : '0.875rem'
-            }}
-          >
-            Refresh
-          </Button>
-          
-          {cacheStatus && (
-            <Chip
-              icon={<Cached />}
-              label={
-                cacheStatus.cached 
-                  ? `Cached (${formatTTL(cacheStatus.ttl_seconds)})`
-                  : 'Fresh Analysis'
-              }
-              color={cacheStatus.cached ? 'success' : 'default'}
-              variant="outlined"
-              sx={{ 
-                fontSize: isSmallScreen ? '0.7rem' : '0.75rem'
-              }}
-            />
-          )}
-          
-          {cacheStatus?.cache_available && (
-            <Tooltip title="Clear cached results">
-              <IconButton
-                onClick={clearCache}
-                color="warning"
-                size={isSmallScreen ? "small" : "medium"}
-              >
-                <Clear />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
+
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: isMobile ? 2 : 4 }}>
-          {error}
-        </Alert>
-      )}
 
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: isMobile ? 4 : 8 }}>
-          <CircularProgress />
-        </Box>
-      )}
 
       {results && (
         <>
@@ -255,6 +145,13 @@ export default function Home() {
               datasetInfo={results.dataset_info}
               vectorizationInfo={results.vectorization_info}
               dataSplitInfo={results.data_split_info}
+            />
+          </Box>
+
+          {/* Hyperparameter Tuning Results */}
+          <Box sx={{ mb: isMobile ? 2 : 4 }}>
+            <HyperparameterTuning
+              hyperparameterTuning={results.hyperparameter_tuning}
             />
           </Box>
 
