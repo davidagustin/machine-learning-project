@@ -82,9 +82,18 @@ machine-learning-project/
 
 4. **Access the Dashboard:**
    - Open [http://localhost:3000](http://localhost:3000)
+   - **Instant loading** - no buttons or waiting required
    - View comprehensive ML results for all 10 algorithms
    - Explore hyperparameter tuning results
    - Analyze performance metrics and visualizations
+
+## ⚡ **Instant Data Access**
+
+The application serves **pre-computed static data** for instant loading:
+- **No "Run Analysis" button** - data loads immediately
+- **No "Refresh" button** - always up-to-date
+- **No waiting time** - results appear instantly
+- **Consistent performance** - same data every time
 
 ## 📊 **Enhanced Data Features**
 

@@ -94,21 +94,28 @@ export default function ROCCurve({
   );
 
   const createROCData = () => {
-    if (!rocData) return { labels: [], datasets: [] };
+    if (!rocData || !rocData.fpr || !rocData.tpr || !rocData.auc) {
+      return { labels: [], datasets: [] };
+    }
 
-    const datasets = Object.keys(rocData.fpr).map((classIndex, i) => {
+    const fprKeys = Object.keys(rocData.fpr);
+    if (fprKeys.length === 0) {
+      return { labels: [], datasets: [] };
+    }
+
+    const datasets = fprKeys.map((classIndex, i) => {
       const classNum = parseInt(classIndex);
-      const className = targetNames[classNum] || `Class ${classNum}`;
-      const auc = rocData.auc[classIndex];
+      const className = targetNames && targetNames[classNum] ? targetNames[classNum] : `Class ${classNum}`;
+      const auc = rocData.auc[classIndex] || 0;
       
       return {
         label: `${className} (AUC: ${auc.toFixed(3)})`,
         data: rocData.fpr[classIndex].map((fpr: number, j: number) => ({
           x: fpr,
-          y: rocData.tpr[classIndex][j]
+          y: rocData.tpr[classIndex][j] || 0
         })),
-        borderColor: `hsl(${(i * 360) / Object.keys(rocData.fpr).length}, 70%, 50%)`,
-        backgroundColor: `hsla(${(i * 360) / Object.keys(rocData.fpr).length}, 70%, 50%, 0.1)`,
+        borderColor: `hsl(${(i * 360) / fprKeys.length}, 70%, 50%)`,
+        backgroundColor: `hsla(${(i * 360) / fprKeys.length}, 70%, 50%, 0.1)`,
         tension: 0.1,
         pointRadius: 0
       };
