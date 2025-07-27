@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "pages/api/ml-results.ts": {
+      "runtime": "nodejs18.x"
+    },
+    "pages/api/clear-cache.ts": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "env": {
+    "REDIS_URL": "redis://default:af4tenGgBW1FIbhHF0O78NI3xYHs6fFv@redis-10393.c14.us-east-1-3.ec2.redns.redis-cloud.com:10393"
+  },
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "installCommand": "npm install"
+} 

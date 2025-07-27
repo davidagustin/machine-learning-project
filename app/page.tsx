@@ -1,103 +1,260 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  CircularProgress,
+  Alert,
+  Grid,
+  Chip,
+  IconButton,
+  Tooltip
+} from '@mui/material';
+import { PlayArrow, Refresh, Cached, Clear } from '@mui/icons-material';
+import ModelComparisonChart from '@/components/ModelComparisonChart';
+import DatasetInfo from '@/components/DatasetInfo';
+import MetricsTable from '@/components/MetricsTable';
+import ConfusionMatrix from '@/components/ConfusionMatrix';
+import ROCCurve from '@/components/ROCCurve';
+
+interface ModelResult {
+  accuracy: number;
+  precision: number;
+  recall: number;
+  f1_score: number;
+  cv_mean: number;
+  cv_std: number;
+  validation_accuracy?: number;
+  predictions: number[];
+  true_labels: number[];
+}
+
+interface DatasetInfo {
+  total_samples: number;
+  num_classes: number;
+  class_distribution: Record<string, number>;
+  avg_text_length: number;
+  min_text_length: number;
+  max_text_length: number;
+  class_names: string[];
+  vectorization_info?: {
+    vocabulary_size: number;
+    max_features: number;
+    ngram_range: number[];
+    min_df: number;
+    max_df: number;
+    avg_features_per_document: number;
+    top_features: [string, number][];
+  };
+}
+
+interface DataSplitInfo {
+  total_samples: number;
+  train_samples: number;
+  val_samples: number;
+  test_samples: number;
+  train_percentage: number;
+  val_percentage: number;
+  test_percentage: number;
+}
+
+interface CacheMetadata {
+  cached: boolean;
+  cache_available: boolean;
+  ttl_seconds?: number;
+  source: 'redis_cache' | 'fresh_analysis';
+}
+
+interface MLResults {
+  dataset_info: DatasetInfo;
+  model_results: Record<string, ModelResult>;
+  target_names: string[];
+  vectorization_info?: any;
+  data_split_info?: DataSplitInfo;
+  cache_metadata?: CacheMetadata;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [results, setResults] = useState<MLResults | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string>('');
+  const [cacheStatus, setCacheStatus] = useState<CacheMetadata | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch('/api/ml-results');
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to fetch data');
+      }
+      
+      setResults(data);
+      setCacheStatus(data.cache_metadata || null);
+      
+      // Set the first model as selected if none is selected
+      if (!selectedModel && data.model_results) {
+        const firstModel = Object.keys(data.model_results)[0];
+        if (firstModel) {
+          setSelectedModel(firstModel);
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearCache = async () => {
+    try {
+      const response = await fetch('/api/clear-cache', { method: 'POST' });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to clear cache');
+      }
+      
+      // Refresh the data after clearing cache
+      await fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to clear cache');
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const formatTTL = (seconds?: number) => {
+    if (!seconds || seconds <= 0) return 'Expired';
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  return (
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h3" component="h1" gutterBottom>
+          20 Newsgroups ML Analysis
+        </Typography>
+        <Typography variant="h6" color="text.secondary" gutterBottom>
+          Text Classification with Multiple Algorithms
+        </Typography>
+        
+        {/* Cache Status and Controls */}
+        <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Button
+            variant="contained"
+            startIcon={<PlayArrow />}
+            onClick={fetchData}
+            disabled={loading}
+            sx={{ minWidth: 120 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+            {loading ? <CircularProgress size={20} /> : 'Run Analysis'}
+          </Button>
+          
+          <Button
+            variant="outlined"
+            startIcon={<Refresh />}
+            onClick={fetchData}
+            disabled={loading}
+          >
+            Refresh
+          </Button>
+          
+          {cacheStatus && (
+            <Chip
+              icon={<Cached />}
+              label={
+                cacheStatus.cached 
+                  ? `Cached (${formatTTL(cacheStatus.ttl_seconds)})`
+                  : 'Fresh Analysis'
+              }
+              color={cacheStatus.cached ? 'success' : 'default'}
+              variant="outlined"
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          )}
+          
+          {cacheStatus?.cache_available && (
+            <Tooltip title="Clear cached results">
+              <IconButton
+                onClick={clearCache}
+                color="warning"
+                size="small"
+              >
+                <Clear />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 4 }}>
+          {error}
+        </Alert>
+      )}
+
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {results && (
+        <>
+          {/* Dataset Information */}
+          <Box sx={{ mb: 4 }}>
+            <DatasetInfo
+              datasetInfo={results.dataset_info}
+              vectorizationInfo={results.vectorization_info}
+              dataSplitInfo={results.data_split_info}
+            />
+          </Box>
+
+          {/* Model Comparison Chart */}
+          <Box sx={{ mb: 4 }}>
+            <ModelComparisonChart modelResults={results.model_results} />
+          </Box>
+
+          {/* Metrics Table */}
+          <Box sx={{ mb: 4 }}>
+            <MetricsTable
+              modelResults={results.model_results}
+              targetNames={results.target_names}
+            />
+          </Box>
+
+          {/* Confusion Matrix */}
+          <Box sx={{ mb: 4 }}>
+            <ConfusionMatrix
+              modelResults={results.model_results}
+              targetNames={results.target_names}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+            />
+          </Box>
+
+          {/* ROC Curve */}
+          <Box sx={{ mb: 4 }}>
+            <ROCCurve
+              modelResults={results.model_results}
+              targetNames={results.target_names}
+              selectedModel={selectedModel}
+              onModelChange={setSelectedModel}
+            />
+          </Box>
+        </>
+      )}
+    </Container>
   );
 }
