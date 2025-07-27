@@ -17,7 +17,7 @@ import {
 import { DataUsage, TextFields, Storage, Timeline } from '@mui/icons-material';
 
 interface DatasetInfoProps {
-  datasetInfo: {
+  datasetInfo?: {
     total_samples: number;
     num_classes: number;
     class_distribution: Record<string, number>;
@@ -47,6 +47,22 @@ interface DatasetInfoProps {
 }
 
 const DatasetInfo: React.FC<DatasetInfoProps> = ({ datasetInfo, vectorizationInfo, dataSplitInfo }) => {
+  // Add null check for datasetInfo
+  if (!datasetInfo) {
+    return (
+      <Card elevation={3}>
+        <CardContent>
+          <Typography variant="h5" component="div" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <DataUsage /> Dataset Information
+          </Typography>
+          <Typography color="text.secondary">
+            Loading dataset information...
+          </Typography>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card elevation={3}>
       <CardContent>

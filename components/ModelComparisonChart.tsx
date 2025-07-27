@@ -32,10 +32,19 @@ interface ModelResult {
 }
 
 interface ModelComparisonChartProps {
-  modelResults: { [key: string]: ModelResult };
+  modelResults?: { [key: string]: ModelResult };
 }
 
 export default function ModelComparisonChart({ modelResults }: ModelComparisonChartProps) {
+  // Add null check for modelResults
+  if (!modelResults || Object.keys(modelResults).length === 0) {
+    return (
+      <div style={{ height: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>Loading model comparison data...</p>
+      </div>
+    );
+  }
+
   const modelNames = Object.keys(modelResults);
   const metrics = ['accuracy', 'precision', 'recall', 'f1_score'];
 

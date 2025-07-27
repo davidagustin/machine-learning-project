@@ -26,7 +26,7 @@ interface ModelResult {
 }
 
 interface MetricsTableProps {
-  modelResults: Record<string, ModelResult>;
+  modelResults?: Record<string, ModelResult>;
   targetNames?: string[];
 }
 
@@ -34,8 +34,19 @@ type SortField = 'model' | 'accuracy' | 'precision' | 'recall' | 'f1_score' | 'c
 type SortDirection = 'asc' | 'desc';
 
 export default function MetricsTable({ modelResults, targetNames }: MetricsTableProps) {
+  // Add null check for modelResults
   const [sortField, setSortField] = useState<SortField>('accuracy');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  if (!modelResults || Object.keys(modelResults).length === 0) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <Typography color="text.secondary">
+          Loading metrics data...
+        </Typography>
+      </Box>
+    );
+  }
 
   const formatPercentage = (value: number) => `${(value * 100).toFixed(2)}%`;
   const formatWithStd = (mean: number, std: number) => `${(mean * 100).toFixed(2)}% ± ${(std * 100).toFixed(2)}%`;

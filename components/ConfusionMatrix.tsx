@@ -52,9 +52,9 @@ interface ModelResult {
 }
 
 interface ConfusionMatrixProps {
-  modelResults: { [key: string]: ModelResult };
-  targetNames: string[];
-  selectedModel: string;
+  modelResults?: { [key: string]: ModelResult };
+  targetNames?: string[];
+  selectedModel?: string;
   onModelChange: (model: string) => void;
 }
 
@@ -67,12 +67,23 @@ export default function ConfusionMatrix({
   const [confusionMatrix, setConfusionMatrix] = useState<number[][]>([]);
 
   useEffect(() => {
-    if (selectedModel && modelResults[selectedModel]) {
+    if (selectedModel && modelResults && modelResults[selectedModel] && targetNames) {
       const result = modelResults[selectedModel];
       const matrix = computeConfusionMatrix(result.true_labels, result.predictions, targetNames.length);
       setConfusionMatrix(matrix);
     }
   }, [selectedModel, modelResults, targetNames]);
+
+  // Add null checks
+  if (!modelResults || !targetNames || !selectedModel) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <Typography color="text.secondary">
+          Loading confusion matrix data...
+        </Typography>
+      </Box>
+    );
+  }
 
   const computeConfusionMatrix = (trueLabels: number[], predictions: number[], numClasses: number) => {
     const matrix = Array(numClasses).fill(0).map(() => Array(numClasses).fill(0));
@@ -220,8 +231,8 @@ export default function ConfusionMatrix({
     const maxValue = Math.max(...confusionMatrix.flat());
     
     return (
-      <TableContainer component={Paper} sx={{ maxHeight: 400, overflow: 'auto' }}>
-        <Table size="small" stickyHeader>
+      <TableContainer component={Paper} sx={{ maxHeight: 600, overflow: 'auto' }}>
+        <Table size="medium" stickyHeader>
           <TableHead>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}>True\Pred</TableCell>
@@ -231,11 +242,11 @@ export default function ConfusionMatrix({
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
-                    fontSize: '0.7rem',
-                    padding: '4px'
+                    fontSize: '0.9rem',
+                    padding: '8px'
                   }}
                 >
-                  {name.substring(0, 8)}...
+                  {name.substring(0, 12)}...
                 </TableCell>
               ))}
             </TableRow>
@@ -247,11 +258,11 @@ export default function ConfusionMatrix({
                   sx={{ 
                     fontWeight: 'bold', 
                     backgroundColor: '#f5f5f5',
-                    fontSize: '0.7rem',
-                    padding: '4px'
+                    fontSize: '0.9rem',
+                    padding: '8px'
                   }}
                 >
-                  {targetNames[i].substring(0, 8)}...
+                  {targetNames[i].substring(0, 12)}...
                 </TableCell>
                 {row.slice(0, 10).map((cell, j) => {
                   const intensity = cell / maxValue;
@@ -267,8 +278,8 @@ export default function ConfusionMatrix({
                         backgroundColor,
                         color: intensity > 0.5 ? 'white' : 'black',
                         fontWeight: isDiagonal ? 'bold' : 'normal',
-                        fontSize: '0.7rem',
-                        padding: '4px',
+                        fontSize: '0.9rem',
+                        padding: '8px',
                         textAlign: 'center',
                         border: isDiagonal ? '2px solid #2e7d32' : '1px solid #ddd'
                       }}
@@ -312,7 +323,7 @@ export default function ConfusionMatrix({
             <Grid item xs={12} md={6}>
               <Paper elevation={2} sx={{ p: 2 }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Scatter Heatmap</Typography>
-                <Box sx={{ height: 400 }}>
+                <Box sx={{ height: 600, width: '100%' }}>
                   <Scatter data={createHeatmapData()} options={options} />
                 </Box>
               </Paper>

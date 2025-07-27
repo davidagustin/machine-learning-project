@@ -50,9 +50,9 @@ interface ModelResult {
 }
 
 interface ROCCurveProps {
-  modelResults: { [key: string]: ModelResult };
-  targetNames: string[];
-  selectedModel: string;
+  modelResults?: { [key: string]: ModelResult };
+  targetNames?: string[];
+  selectedModel?: string;
   onModelChange: (model: string) => void;
 }
 
@@ -65,13 +65,24 @@ export default function ROCCurve({
   const [rocData, setRocData] = useState<any>(null);
 
   useEffect(() => {
-    if (selectedModel && modelResults[selectedModel] && modelResults[selectedModel].roc_data) {
+    if (selectedModel && modelResults && modelResults[selectedModel] && modelResults[selectedModel].roc_data) {
       const result = modelResults[selectedModel];
       setRocData(result.roc_data);
     } else {
       setRocData(null);
     }
   }, [selectedModel, modelResults]);
+
+  // Add null checks
+  if (!modelResults || !targetNames || !selectedModel) {
+    return (
+      <Box sx={{ p: 2, textAlign: 'center' }}>
+        <Typography color="text.secondary">
+          Loading ROC curve data...
+        </Typography>
+      </Box>
+    );
+  }
 
   const modelNames = Object.keys(modelResults).filter(name => 
     modelResults[name].roc_data !== undefined
